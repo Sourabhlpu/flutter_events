@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,20 +13,25 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MyHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  
   @override
   State createState() => MyHomePageState();
 }
 
 class MyHomePageState extends State<MyHomePage> {
+
   final PageController _pagecontroller = new PageController(initialPage: 0);
   int _currentPage = 0;
+
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     return Scaffold(
         body: Stack(
       children: <Widget>[
