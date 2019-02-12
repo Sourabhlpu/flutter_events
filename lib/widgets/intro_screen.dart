@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class IntroPage extends StatelessWidget {
+class IntroPageItem extends StatelessWidget {
 
   final String _imageAsset;
   final String _title;
   final String _subtitle;
 
-  IntroPage(this._imageAsset, this._title, this._subtitle);
+  IntroPageItem(this._imageAsset, this._title, this._subtitle);
 
 
   @override
