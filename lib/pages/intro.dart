@@ -3,7 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_events/widgets/primary_btn.dart';
 import 'package:flutter_events/widgets/intro_screen.dart';
 import 'package:flutter_events/widgets/intro_page_indicators.dart';
+import 'package:flutter_events/src/app_bloc.dart';
+
+
 class IntroPage extends StatefulWidget {
+  final EventsBloc _bloc;
+
+  IntroPage(this._bloc);
   @override
   State createState() => IntroPageState();
 }
@@ -15,7 +21,9 @@ class IntroPageState extends State<IntroPage> {
 
   void _openAuthScreen()
   {
+    widget._bloc.setPrefsBool('shouldShowIntro', false);
     Navigator.pushReplacementNamed(context, '/auth');
+
   }
 
   @override
