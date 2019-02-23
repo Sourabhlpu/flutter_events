@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_events/pojo/Interest.dart';
-import 'dart:async';
+
 
 enum CurrentHome {
   noPage,
@@ -42,48 +42,13 @@ class EventsBloc {
   EventsBloc() {
     _initPrefs();
 
-    _signupController.stream.listen((user) {
-      _isLoadingSubject.add(true);
-      _firebaseAuth
-          .createUserWithEmailAndPassword(
-              email: user.email, password: user.password)
-          .then((firebaseUser) {
-        _isLoadingSubject.add(false);
-        _firestore.collection('user').document().setData({
-          'email': user.email,
-          'phone': user.phoneNumber,
-          'name': user.name
-        });
-      });
-    });
+    _listenSignIn();
 
-    _signinController.stream.listen((user) {
-      _isLoadingSubject.add(true);
-
-      if (user.email.isEmpty && user.phoneNumber.isNotEmpty) {
-        _firestore
-            .collection('user')
-            .where('phone', isEqualTo: user.phoneNumber)
-            .getDocuments();
-      } else {
-        _firebaseAuth.signInWithEmailAndPassword(
-            email: user.email, password: user.password);
-      }
-    });
+    _listenSignup();
 
     _shouldShowIntroSubject.stream.listen((showIntro) {});
 
-    _firebaseAuth.onAuthStateChanged.listen((firebaseUser) {
-      if (firebaseUser != null) {
-        _currentHomeController.add(CurrentHome.interestsPage);
-      } else {
-        if (_getBoolFromPrefs('shouldShowIntro')) {
-          _currentHomeController.add(CurrentHome.introPage);
-        } else {
-          _currentHomeController.add(CurrentHome.authPage);
-        }
-      }
-    });
+    _listenFirebaseAuth();
   }
 
   bool _getBoolFromPrefs(String key) {
@@ -115,5 +80,60 @@ class EventsBloc {
 
       _interestListController.sink.add(_interests);
     });
+  }
+
+  void _listenFirebaseAuth()
+  {
+    _firebaseAuth.onAuthStateChanged.listen((firebaseUser) {
+      if (firebaseUser != null) {
+        _currentHomeController.add(CurrentHome.interestsPage);
+      } else {
+        if (_getBoolFromPrefs('shouldShowIntro')) {
+          _currentHomeController.add(CurrentHome.introPage);
+        } else {
+          _currentHomeController.add(CurrentHome.authPage);
+        }
+      }
+    }).onError(_handleAuthError);
+  }
+
+  void _listenSignIn()
+  {
+    _signinController.stream.listen((user) {
+      _isLoadingSubject.add(true);
+
+      if (user.email.isEmpty && user.phoneNumber.isNotEmpty) {
+        _firestore
+            .collection('user')
+            .where('phone', isEqualTo: user.phoneNumber)
+            .getDocuments();
+      } else {
+        _firebaseAuth.signInWithEmailAndPassword(
+            email: user.email, password: user.password);
+      }
+    });
+  }
+
+  void _listenSignup()
+  {
+    _signupController.stream.listen((user) {
+      _isLoadingSubject.add(true);
+      _firebaseAuth
+          .createUserWithEmailAndPassword(
+          email: user.email, password: user.password)
+          .then((firebaseUser) {
+        _isLoadingSubject.add(false);
+        _firestore.collection('user').document().setData({
+          'email': user.email,
+          'phone': user.phoneNumber,
+          'name': user.name
+        });
+      });
+    });
+  }
+
+  void _handleAuthError(error)
+  {
+    print(error);
   }
 }

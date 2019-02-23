@@ -35,27 +35,31 @@ class _AuthenticationState extends State<Authentication> {
           child: SingleChildScrollView(
             child: Container(
               height: MediaQuery.of(context).size.height,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  TabBar(
-                    tabs: [
-                      Tab(text: 'Sign In'),
-                      Tab(text: 'Sign Up'),
-                    ],
-                    labelColor: Theme.of(context).primaryColor,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorPadding:
-                        const EdgeInsets.symmetric(horizontal: 16.0),
-                    labelPadding: const EdgeInsets.symmetric(vertical: 4.0),
-                  ),
-                  Flexible(
-                    flex: 1,
-                    fit: FlexFit.loose,
-                    child: TabBarView(
-                        children: [_buildSignInForm(), _buildSignupForm()]),
-                  )
-                ],
+              child: LoadingInfo(
+                isLoading: widget._bloc.isLoading,
+
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    TabBar(
+                      tabs: [
+                        Tab(text: 'Sign In'),
+                        Tab(text: 'Sign Up'),
+                      ],
+                      labelColor: Theme.of(context).primaryColor,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorPadding:
+                          const EdgeInsets.symmetric(horizontal: 16.0),
+                      labelPadding: const EdgeInsets.symmetric(vertical: 4.0),
+                    ),
+                    Flexible(
+                      flex: 1,
+                      fit: FlexFit.loose,
+                      child: TabBarView(
+                          children: [_buildSignInForm(), _buildSignupForm()]),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -171,34 +175,29 @@ class _AuthenticationState extends State<Authentication> {
   Widget _buildSignupForm() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 16.0),
-      child: Stack(
-        children: <Widget>[
-          Form(
-            key: _signupformKey,
-            child: Column(
-              children: <Widget>[
-                _buildNameTextField(),
-                SizedBox(
-                  height: 8.0,
-                ),
-                _buildEmailTextField('Email Address'),
-                SizedBox(
-                  height: 8.0,
-                ),
-                _buildPhoneTextField(),
-                SizedBox(
-                  height: 8.0,
-                ),
-                _buildPasswordTextField(),
-                SizedBox(
-                  height: 20.0,
-                ),
-                PrimaryGradientButton('Sign Up', _doSignUp),
-              ],
+      child: Form(
+        key: _signupformKey,
+        child: Column(
+          children: <Widget>[
+            _buildNameTextField(),
+            SizedBox(
+              height: 8.0,
             ),
-          ),
-          Center(child: LoadingInfo(widget._bloc.isLoading)),
-        ],
+            _buildEmailTextField('Email Address'),
+            SizedBox(
+              height: 8.0,
+            ),
+            _buildPhoneTextField(),
+            SizedBox(
+              height: 8.0,
+            ),
+            _buildPasswordTextField(),
+            SizedBox(
+              height: 20.0,
+            ),
+            PrimaryGradientButton('Sign Up', _doSignUp),
+          ],
+        ),
       ),
     );
   }

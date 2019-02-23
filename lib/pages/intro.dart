@@ -28,7 +28,7 @@ class IntroPageState extends State<IntroPage> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    //SystemChrome.setEnabledSystemUIOverlays([]);
     return Scaffold(
         body: Stack(
           children: <Widget>[
