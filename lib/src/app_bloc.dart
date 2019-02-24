@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/src/user.dart';
 import 'package:rxdart/rxdart.dart';
@@ -22,7 +23,10 @@ enum AddSinkType {
 
 class EventsBloc {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+
+
   final Firestore _firestore = Firestore.instance;
+
 
   AddItemDelegate _delegate;
 
@@ -34,7 +38,6 @@ class EventsBloc {
 
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
-
 
   Sink<bool> get shouldShowIntro => _shouldShowIntroSubject.sink;
   final _shouldShowIntroSubject = StreamController<bool>();
@@ -117,8 +120,10 @@ class EventsBloc {
               .where('phone', isEqualTo: user.phoneNumber)
               .getDocuments();
         } else {
-          _firebaseAuth.signInWithEmailAndPassword(
-              email: user.email, password: user.password);
+          _firebaseAuth
+              .signInWithEmailAndPassword(
+                  email: user.email, password: user.password)
+              .catchError(_handleAuthError);
         }
       } else {
         /*_isNetworkAvailableSubject.add(false);*/
@@ -139,7 +144,7 @@ class EventsBloc {
       if (_networkAvailable) {
         _firebaseAuth
             .createUserWithEmailAndPassword(
-                email: user.email, password: user.password)
+                email: user.email, password: user.password).catchError(_handleAuthError)
             .then((firebaseUser) {
           _isLoadingSubject.add(false);
           _firestore.collection('user').document().setData({
@@ -156,7 +161,17 @@ class EventsBloc {
   }
 
   void _handleAuthError(error) {
+
     print(error);
+    _isLoadingSubject.add(false);
+    if(error is PlatformException)
+      {
+        final _error = error as PlatformException;
+        _delegate.onError(_error.message);
+      }
+
+
+
   }
 
   Future<bool> _checkNetworkAvailability() async {
@@ -178,5 +193,10 @@ class EventsBloc {
     if (type == AddSinkType.signIn)
       doSignin.add(item);
     else if (type == AddSinkType.signUp) doSignup.add(item);
+  }
+
+  _initFirestore()
+  {
+
   }
 }

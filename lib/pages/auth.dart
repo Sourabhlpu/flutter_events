@@ -240,7 +240,7 @@ class _AuthenticationState extends State<Authentication>
       _signupformKey.currentState.save();
       User _user = User(
           name: _userName,
-          email: _email,
+          email: _emailOrPhone,
           phoneNumber: _phone,
           password: _password);
 
