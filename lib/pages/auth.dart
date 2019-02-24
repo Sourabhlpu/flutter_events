@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_events/delegates/addItem.dart';
 
 import '../widgets/primary_btn.dart';
 import '../widgets/primary_btn_white.dart';
@@ -13,10 +14,13 @@ class Authentication extends StatefulWidget {
   Authentication(this._bloc);
 
   @override
-  _AuthenticationState createState() => _AuthenticationState();
+  _AuthenticationState createState() {
+    return _AuthenticationState();
+  }
 }
 
-class _AuthenticationState extends State<Authentication> {
+class _AuthenticationState extends State<Authentication>
+    implements AddItemDelegate {
   final _signInformKey = GlobalKey<FormState>();
   final _signupformKey = GlobalKey<FormState>();
   String _userName;
@@ -24,46 +28,56 @@ class _AuthenticationState extends State<Authentication> {
   String _phone;
   String _password;
   String _emailOrPhone;
+  BuildContext context;
+
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
-    return new Scaffold(
-      body: SafeArea(
-        child: DefaultTabController(
-          length: 2,
-          child: SingleChildScrollView(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              child: LoadingInfo(
-                isLoading: widget._bloc.isLoading,
 
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    TabBar(
-                      tabs: [
-                        Tab(text: 'Sign In'),
-                        Tab(text: 'Sign Up'),
+
+    return new Scaffold(
+      body: Builder(
+        builder: (BuildContext context) {
+          this.context = context;
+          return SafeArea(
+            child: DefaultTabController(
+              length: 2,
+              child: SingleChildScrollView(
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: LoadingInfo(
+                    isLoading: widget._bloc.isLoading,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        TabBar(
+                          tabs: [
+                            Tab(text: 'Sign In'),
+                            Tab(text: 'Sign Up'),
+                          ],
+                          labelColor: Theme.of(context).primaryColor,
+                          unselectedLabelColor: Colors.grey,
+                          indicatorPadding:
+                              const EdgeInsets.symmetric(horizontal: 16.0),
+                          labelPadding:
+                              const EdgeInsets.symmetric(vertical: 4.0),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          fit: FlexFit.loose,
+                          child: TabBarView(children: [
+                            _buildSignInForm(),
+                            _buildSignupForm()
+                          ]),
+                        )
                       ],
-                      labelColor: Theme.of(context).primaryColor,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorPadding:
-                          const EdgeInsets.symmetric(horizontal: 16.0),
-                      labelPadding: const EdgeInsets.symmetric(vertical: 4.0),
                     ),
-                    Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: TabBarView(
-                          children: [_buildSignInForm(), _buildSignupForm()]),
-                    )
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
       backgroundColor: Colors.white,
     );
@@ -217,7 +231,7 @@ class _AuthenticationState extends State<Authentication> {
           phoneNumber: _phone,
           password: _password);
 
-      widget._bloc.doSignin.add(_user);
+      widget._bloc.addItem(_user, this, AddSinkType.signIn);
     }
   }
 
@@ -230,7 +244,21 @@ class _AuthenticationState extends State<Authentication> {
           phoneNumber: _phone,
           password: _password);
 
-      widget._bloc.doSignup.add(_user);
+      widget._bloc.addItem(_user, this, AddSinkType.signUp);
     }
+  }
+
+  @override
+  void onError(String message) {
+    // TODO: implement onError
+    final snackbar = SnackBar(content: Text(message));
+
+    Scaffold.of(context).showSnackBar(snackbar);
+    print(message);
+  }
+
+  @override
+  void onSuccess() {
+    // TODO: implement onSuccess
   }
 }
