@@ -12,5 +12,9 @@ class Interest{
 
   String get interestName => _interestName;
 
+  set setIsSelected(bool value) {
+    _isSelected = value;
+  }
+
 
 }

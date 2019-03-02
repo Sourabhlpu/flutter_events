@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 class PrimaryGradientButton extends StatelessWidget {
   final String btnText;
   final Function _btnAction;
+  final bool _showShadow;
 
-  PrimaryGradientButton(this.btnText, this._btnAction);
+  PrimaryGradientButton(this.btnText, this._btnAction, this._showShadow);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -15,7 +16,12 @@ class PrimaryGradientButton extends StatelessWidget {
           gradient: LinearGradient(
               colors: [const Color(0xFFDF69DD), const Color(0xFFED5D66)],
               begin: Alignment.centerLeft,
-              end: Alignment.centerRight)),
+              end: Alignment.centerRight),
+      boxShadow: [BoxShadow(
+        color: _showShadow? Theme.of(context).primaryColor : Colors.transparent,
+        blurRadius: 20.0
+
+      )]),
       child: FlatButton(
         onPressed: _btnAction,
         child: Text(btnText),

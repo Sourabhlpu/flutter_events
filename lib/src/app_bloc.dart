@@ -8,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_events/pojo/Interest.dart';
 import 'package:connectivity/connectivity.dart';
+import 'dart:collection';
 
 enum CurrentHome {
   noPage,
@@ -16,17 +17,16 @@ enum CurrentHome {
   authPage,
 }
 
-enum AddSinkType {
-  signIn,
-  signUp,
-}
+enum AddSinkType { signIn, signUp, interestType, saveInterests }
 
 class EventsBloc {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
-
   final Firestore _firestore = Firestore.instance;
 
+  FirebaseUser user;
+
+  List<Interest> _interests;
 
   AddItemDelegate _delegate;
 
@@ -46,8 +46,16 @@ class EventsBloc {
   final _currentHomeController =
       BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
 
-  Stream<List<Interest>> get interestList => _interestListController.stream;
-  final _interestListController = BehaviorSubject<List<Interest>>();
+  Stream<UnmodifiableListView<Interest>> get interestList =>
+      _interestListController.stream;
+  final _interestListController =
+      BehaviorSubject<UnmodifiableListView<Interest>>();
+
+  Sink<int> get interestSelection => _interestSelectionController.sink;
+  final _interestSelectionController = StreamController<int>();
+
+  Sink<bool> get interestBtn => _interestsBtnController.sink;
+  final _interestsBtnController = StreamController<bool>();
 
   SharedPreferences prefs;
 
@@ -80,23 +88,57 @@ class EventsBloc {
   }
 
   void listenToInterests() {
+    _isLoadingSubject.add(true);
     _firestore
         .collection('interests')
         .getDocuments()
         .asStream()
         .listen((snapshot) {
-      var _interests = snapshot.documents
+      _interests = snapshot.documents
           .map((document) => Interest(
               document['interestImage'], document['interestName'], false))
           .toList();
 
-      _interestListController.sink.add(_interests);
+      _interestListController.sink.add(UnmodifiableListView(_interests));
+      _isLoadingSubject.add(false);
+    });
+  }
+
+  void initSelectInterestsStreams() {
+    _interestSelectionController.stream.listen((index) {
+      _interests[index].setIsSelected = !_interests[index].isSelected;
+
+      _interestListController.add(UnmodifiableListView(_interests));
+    });
+  }
+
+  void initInterestBtnStream() {
+    _interestsBtnController.stream.listen((value) {
+      bool _isInterestSelected = false;
+
+
+      for (Interest interest in _interests) {
+        if (interest.isSelected) {
+          _isInterestSelected = true;
+          return;
+        } else {
+          _isInterestSelected = false;
+        }
+      }
+
+      if (!_isInterestSelected)
+        _delegate.onError("Select atleast one interest");
+      else
+        {
+          //_firestore.collection("user").document()
+        }
     });
   }
 
   void _listenFirebaseAuth() {
     _firebaseAuth.onAuthStateChanged.listen((firebaseUser) {
       if (firebaseUser != null) {
+         user = firebaseUser;
         _currentHomeController.add(CurrentHome.interestsPage);
       } else {
         if (_getBoolFromPrefs('shouldShowIntro')) {
@@ -144,7 +186,8 @@ class EventsBloc {
       if (_networkAvailable) {
         _firebaseAuth
             .createUserWithEmailAndPassword(
-                email: user.email, password: user.password).catchError(_handleAuthError)
+                email: user.email, password: user.password)
+            .catchError(_handleAuthError)
             .then((firebaseUser) {
           _isLoadingSubject.add(false);
           _firestore.collection('user').document().setData({
@@ -161,17 +204,12 @@ class EventsBloc {
   }
 
   void _handleAuthError(error) {
-
     print(error);
     _isLoadingSubject.add(false);
-    if(error is PlatformException)
-      {
-        final _error = error as PlatformException;
-        _delegate.onError(_error.message);
-      }
-
-
-
+    if (error is PlatformException) {
+      final _error = error as PlatformException;
+      _delegate.onError(_error.message);
+    }
   }
 
   Future<bool> _checkNetworkAvailability() async {
@@ -192,11 +230,21 @@ class EventsBloc {
 
     if (type == AddSinkType.signIn)
       doSignin.add(item);
-    else if (type == AddSinkType.signUp) doSignup.add(item);
+    else if (type == AddSinkType.signUp)
+      doSignup.add(item);
+    else if (type == AddSinkType.interestType)
+      interestSelection.add(item);
+    else if (type == AddSinkType.saveInterests) interestBtn.add(item);
   }
 
-  _initFirestore()
-  {
+  void disposeAuthStreams() {
+    _signupController.close();
+    _signinController.close();
+  }
 
+  void disposeInterestStreams() {
+    _interestListController.close();
+    _interestSelectionController.close();
+    _interests = null;
   }
 }

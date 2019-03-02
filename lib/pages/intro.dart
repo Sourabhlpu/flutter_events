@@ -59,7 +59,7 @@ class IntroPageState extends State<IntroPage> {
                       width: 0,
                       height: 8.0,
                     ),
-                    PrimaryGradientButton('Get Started', _openAuthScreen)
+                    PrimaryGradientButton('Get Started', _openAuthScreen, false)
                   ],
                 )),
 
@@ -68,5 +68,11 @@ class IntroPageState extends State<IntroPage> {
             child: PrimaryGradientButton('Get Started')),*/
           ],
         ));
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 }

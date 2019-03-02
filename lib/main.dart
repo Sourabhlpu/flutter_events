@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_events/pages/intro.dart';
 import 'package:flutter_events/pages/auth.dart';
 import 'package:flutter_events/utils/custom_colors.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_events/src/app_bloc.dart';
 import 'package:flutter_events/pages/interests.dart';
+import 'package:flutter_events/pages/home.dart';
 
 void main() {
   EventsBloc eventsBloc = EventsBloc();
+ /* debugPaintSizeEnabled=true;*/
   runApp(MyApp(eventsBloc));
 }
 
@@ -19,19 +21,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+   /* SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
-    ));
+    ));*/
 
     return MaterialApp(
+
         theme: ThemeData(
           primarySwatch: customPrimaryColor,
+
         ),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
           '/auth': (context) => Authentication(_bloc),
           '/interests': (context) => Interests(_bloc),
+          '/home': (context) => HomePage(_bloc)
         },
         home: _handleHomeScreen());
   }

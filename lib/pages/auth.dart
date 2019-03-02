@@ -169,7 +169,7 @@ class _AuthenticationState extends State<Authentication>
             SizedBox(
               height: 20.0,
             ),
-            PrimaryGradientButton('Sign In', _doSignIn),
+            PrimaryGradientButton('Sign In', _doSignIn, false),
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),
@@ -209,7 +209,7 @@ class _AuthenticationState extends State<Authentication>
             SizedBox(
               height: 20.0,
             ),
-            PrimaryGradientButton('Sign Up', _doSignUp),
+            PrimaryGradientButton('Sign Up', _doSignUp, false),
           ],
         ),
       ),
@@ -260,5 +260,12 @@ class _AuthenticationState extends State<Authentication>
   @override
   void onSuccess() {
     // TODO: implement onSuccess
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    widget._bloc.disposeAuthStreams();
   }
 }
