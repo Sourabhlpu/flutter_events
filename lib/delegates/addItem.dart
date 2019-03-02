@@ -1,4 +1,8 @@
+enum SuccessType{
+  successSign,
+  successSignup
+}
 abstract class AddItemDelegate {
-  void onSuccess();
+  void onSuccess(SuccessType type);
   void onError(String message);
 }

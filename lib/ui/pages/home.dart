@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_events/pojo/event.dart';
+import 'package:flutter_events/models/event.dart';
 
 class HomePage extends StatefulWidget {
-  final _bloc;
-
-  HomePage(this._bloc);
 
   @override
   _HomePageState createState() => _HomePageState();

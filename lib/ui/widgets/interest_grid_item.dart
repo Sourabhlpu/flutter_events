@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_events/widgets/circular_checkbox.dart';
+import 'package:flutter_events/ui/widgets/circular_checkbox.dart';
 
 class InterestGridItem extends StatelessWidget {
   final String _image;

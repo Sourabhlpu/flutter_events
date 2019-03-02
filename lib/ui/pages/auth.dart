@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/blocs/auth_bloc.dart';
+import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
 
 import '../widgets/primary_btn.dart';
 import '../widgets/primary_btn_white.dart';
-import '../src/user.dart';
-import '../src/app_bloc.dart';
+import 'package:flutter_events/models/user.dart';
 import '../widgets/loading_info.dart';
 
 class Authentication extends StatefulWidget {
-  final EventsBloc _bloc;
-
-  Authentication(this._bloc);
-
   @override
   _AuthenticationState createState() {
     return _AuthenticationState();
@@ -28,17 +26,24 @@ class _AuthenticationState extends State<Authentication>
   String _phone;
   String _password;
   String _emailOrPhone;
-  BuildContext context;
+  BuildContext contextSnackbar;
 
+  AuthBloc _bloc;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _bloc = BlocProvider.of<AuthBloc>(context);
+  }
 
   @override
   Widget build(BuildContext context) {
-
-
     return new Scaffold(
       body: Builder(
         builder: (BuildContext context) {
-          this.context = context;
+          this.contextSnackbar = context;
           return SafeArea(
             child: DefaultTabController(
               length: 2,
@@ -46,7 +51,7 @@ class _AuthenticationState extends State<Authentication>
                 child: Container(
                   height: MediaQuery.of(context).size.height,
                   child: LoadingInfo(
-                    isLoading: widget._bloc.isLoading,
+                    isLoading: _bloc.isLoading,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
@@ -231,7 +236,7 @@ class _AuthenticationState extends State<Authentication>
           phoneNumber: _phone,
           password: _password);
 
-      widget._bloc.addItem(_user, this, AddSinkType.signIn);
+      _bloc.addItem(_user, this, AddSinkType.signIn);
     }
   }
 
@@ -244,7 +249,7 @@ class _AuthenticationState extends State<Authentication>
           phoneNumber: _phone,
           password: _password);
 
-      widget._bloc.addItem(_user, this, AddSinkType.signUp);
+      _bloc.addItem(_user, this, AddSinkType.signUp);
     }
   }
 
@@ -253,19 +258,17 @@ class _AuthenticationState extends State<Authentication>
     // TODO: implement onError
     final snackbar = SnackBar(content: Text(message));
 
-    Scaffold.of(context).showSnackBar(snackbar);
+    Scaffold.of(contextSnackbar).showSnackBar(snackbar);
     print(message);
   }
 
   @override
-  void onSuccess() {
+  void onSuccess(SuccessType type) {
     // TODO: implement onSuccess
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    widget._bloc.disposeAuthStreams();
+    if (type == SuccessType.successSignup) {
+      Navigator.pushReplacementNamed(contextSnackbar, '/interests');
+    } else if (type == SuccessType.successSign) {
+      Navigator.pushReplacementNamed(contextSnackbar, '/home');
+    }
   }
 }

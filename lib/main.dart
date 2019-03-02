@@ -1,63 +1,78 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_events/pages/intro.dart';
-import 'package:flutter_events/pages/auth.dart';
+import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/blocs/auth_bloc.dart';
+import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/blocs/interests_bloc.dart';
+import 'package:flutter_events/ui/pages/intro.dart';
+import 'package:flutter_events/ui/pages/auth.dart';
 import 'package:flutter_events/utils/custom_colors.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_events/src/app_bloc.dart';
-import 'package:flutter_events/pages/interests.dart';
-import 'package:flutter_events/pages/home.dart';
+import 'package:flutter_events/ui/pages/interests.dart';
+import 'package:flutter_events/ui/pages/home.dart';
 
 void main() {
-  EventsBloc eventsBloc = EventsBloc();
- /* debugPaintSizeEnabled=true;*/
-  runApp(MyApp(eventsBloc));
+  /* debugPaintSizeEnabled=true;*/
+  runApp(BlocProvider<ApplicationBloc>(
+    bloc: ApplicationBloc(),
+    child: MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-  final EventsBloc _bloc;
-
-  MyApp(this._bloc);
 
   @override
   Widget build(BuildContext context) {
-   /* SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
+    /* SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
     ));*/
 
     return MaterialApp(
-
         theme: ThemeData(
           primarySwatch: customPrimaryColor,
-
         ),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
-          '/auth': (context) => Authentication(_bloc),
-          '/interests': (context) => Interests(_bloc),
-          '/home': (context) => HomePage(_bloc)
+          '/auth': (context) => BlocProvider<AuthBloc>(
+                bloc: AuthBloc(),
+                child: Authentication(),
+              ),
+          '/interests': (context) => BlocProvider<InterestsBloc>(
+                bloc: InterestsBloc(),
+                child: Interests(),
+              ),
+          '/home': (context) => HomePage()
         },
-        home: _handleHomeScreen());
+        home: _handleHomeScreen(context));
   }
 
-  Widget _handleHomeScreen() {
+  Widget _handleHomeScreen(BuildContext context) {
     return StreamBuilder<CurrentHome>(
-      stream: _bloc.currentHome,
+      stream: BlocProvider.of<ApplicationBloc>(context).currentHome,
       initialData: CurrentHome.noPage,
       builder: (BuildContext context, AsyncSnapshot<CurrentHome> snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data == CurrentHome.introPage) {
-            return IntroPage(_bloc);
+            return IntroPage();
           } else if (snapshot.data == CurrentHome.authPage) {
-            return Authentication(_bloc);
+            return BlocProvider<AuthBloc>(
+              bloc: AuthBloc(),
+              child: Authentication(),
+            );
           } else if (snapshot.data == CurrentHome.interestsPage) {
-            return Interests(_bloc);
+            return BlocProvider<InterestsBloc>(
+              bloc: InterestsBloc(),
+              child: Interests(),
+            );
           }
-          else if(snapshot.data == CurrentHome.noPage)
+          else if(snapshot.data == CurrentHome.homePage)
             {
-              return Container();
+              return HomePage();
             }
+          else if (snapshot.data == CurrentHome.noPage) {
+            return Container();
+          }
         }
       },
     );

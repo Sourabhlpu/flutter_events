@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/blocs/interests_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/src/app_bloc.dart';
-import 'package:flutter_events/pojo/Interest.dart';
-import 'package:flutter_events/widgets/interest_grid_item.dart';
+import 'package:flutter_events/models/Interest.dart';
+import 'package:flutter_events/ui/widgets/interest_grid_item.dart';
 import 'dart:collection';
-import 'package:flutter_events/widgets/loading_info.dart';
+import 'package:flutter_events/ui/widgets/loading_info.dart';
 
-import 'package:flutter_events/widgets/primary_btn.dart';
+import 'package:flutter_events/ui/widgets/primary_btn.dart';
 
 class Interests extends StatefulWidget {
-  final EventsBloc _bloc;
 
-  Interests(this._bloc);
 
   @override
   _InterestsState createState() => _InterestsState();
@@ -21,14 +21,18 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
 
   BuildContext _context;
 
+  InterestsBloc _bloc;
+
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    widget._bloc.listenToInterests();
-    widget._bloc.initSelectInterestsStreams();
-    widget._bloc.initInterestBtnStream();
+
+    _bloc = BlocProvider.of<InterestsBloc>(context);
+
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +47,11 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
         backgroundColor: Colors.white,
       ),
       body: LoadingInfo(
-        isLoading: widget._bloc.isLoading,
+        isLoading: _bloc.isLoading,
         child: Stack(
           children: <Widget>[
             StreamBuilder(
-                stream: widget._bloc.interestList,
+                stream: _bloc.interestList,
                 initialData: UnmodifiableListView<Interest>([]),
                 builder:
                     (BuildContext context, AsyncSnapshot<List<Interest>> snapshots) {
@@ -85,23 +89,17 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
 
   void _onInterestTapped(int position) {
 
-    widget._bloc.addItem(position, this, AddSinkType.interestType);
+   _bloc.addItem(position, this, AddSinkType.interestType);
     //widget._bloc.interestSelection.add(position);
   }
 
   void _onButtonClicked()
   {
-    //Navigator.pushReplacementNamed(context, '/home');
+    Navigator.pushReplacementNamed(context, '/home');
     print('btn clicked');
-    widget._bloc.addItem(true, this, AddSinkType.saveInterests);
+    _bloc.addItem(true, this, AddSinkType.saveInterests);
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-    widget._bloc.disposeInterestStreams();
-  }
 
   @override
   void onError(String message) {
@@ -111,7 +109,7 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
   }
 
   @override
-  void onSuccess() {
+  void onSuccess(SuccessType type) {
     // TODO: implement onSuccess
   }
 }
