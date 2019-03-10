@@ -35,7 +35,7 @@ class InterestGridItem extends StatelessWidget {
           alignment: Alignment(0.9, 0.9),
           child: CircularCheckbox(_isSelected),
         ),
-        new Positioned.fill(
+        Positioned.fill(
             child: new Material(
                 color: Colors.transparent,
                 child: new InkWell(

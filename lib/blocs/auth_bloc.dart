@@ -52,13 +52,17 @@ class AuthBloc implements BlocBase{
               .where('phone', isEqualTo: user.phoneNumber)
               .getDocuments();
         } else {
-          AppRepository.firebaseAuth
+          /*AppRepository.firebaseAuth
               .signInWithEmailAndPassword(
               email: user.email, password: user.password)
               .then((firebaseUser){
                 _handleSignInSuccess(firebaseUser, SuccessType.successSign);
           })
-              .catchError(_handleAuthError);
+              .catchError(_handleAuthError);*/
+
+          _signinWithEmail(user);
+
+
         }
       } else {
         /*_isNetworkAvailableSubject.add(false);*/
@@ -68,6 +72,14 @@ class AuthBloc implements BlocBase{
         //throw Exception('No Internet');
       }
     });
+  }
+
+  void _signinWithEmail(User user)
+  {
+    repository.signInWithEmailPassword(user).then((firebaseUser){
+      _handleSignInSuccess(firebaseUser, SuccessType.successSign);
+    })
+        .catchError(_handleAuthError);
   }
 
   void _listenSignup() {

@@ -1,15 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/ui/widgets/card_item_home.dart';
+import 'package:flutter_events/ui/widgets/loading_info.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_events/blocs/home_bloc.dart';
+import 'package:flutter_events/blocs/bloc_provider.dart';
 
 class HomePage extends StatefulWidget {
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+
+  HomeBloc _bloc;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    Future.delayed(Duration(seconds: 1));
+    _bloc = BlocProvider.of<HomeBloc>(context);
+
+  }
   @override
   Widget build(BuildContext context) {
+    _onCardItemTapped(int index, Events event) {
+      print("card $index tapped");
+      Navigator.pushNamed(context, '/event_details', arguments: event);
+    }
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -40,44 +62,91 @@ class _HomePageState extends State<HomePage> {
               unselectedLabelColor: Colors.grey,
             ),
           ),
-          body: TabBarView(children: [
-            Tab(
-              child: ListView.builder(
-                  itemCount: events.length,
-                  padding: const EdgeInsets.all(8.0),
-                  itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          FadeInImage.assetNetwork(
-                            alignment: Alignment.topCenter,
-                            placeholder: placeholder,
-                            image: events[index].image,
-                            fit: BoxFit.fill,
-                            height: 200,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-            ),
-            Tab(
-              child: Center(
-                child: Text('upcoming'),
+          bottomNavigationBar: BottomNavigationBar(
+              currentIndex: 0,
+              type: BottomNavigationBarType.fixed,
+              items: <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                    icon: Icon(
+                      Icons.home,
+                      color: Colors.grey,
+                    ),
+                    title: Text(
+                      'Home',
+                      style: TextStyle(color: Colors.grey),
+                    )),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.grey,
+                  ),
+                  title: Text(
+                    'Explore',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(FontAwesomeIcons.ticketAlt, color: Colors.grey),
+                  title: Text(
+                    'My Tickets',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    FontAwesomeIcons.userCircle,
+                    color: Colors.grey,
+                  ),
+                  title: Text(
+                    'Profile',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ]),
+          body: LoadingInfo(
+            isLoading: _bloc.isLoading,
+            child: TabBarView(children: [
+              Tab(
+                child: StreamBuilder(
+                  initialData: List<Events>(),
+                  stream: _bloc.eventList,
+                  builder: (context, AsyncSnapshot<List<Events>> snapshots) {
+
+                    if(snapshots.hasData && snapshots.data.length > 0)
+                      {
+                        return ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(
+                                  snapshots.data[index], _onCardItemTapped, index, _bloc);
+                            });
+                      }
+
+                      else
+                        {
+                          return Container();
+                        }
+
+                  }
+                ),
               ),
-            ),
-            Tab(
-              child: Center(
-                child: Text('popular'),
+              Tab(
+                child: Center(
+                  child: Text('upcoming'),
+                ),
               ),
-            ),
-            Tab(
-              child: Center(
-                child: Text('all'),
+              Tab(
+                child: Center(
+                  child: Text('popular'),
+                ),
               ),
-            )
-          ])),
+              Tab(
+                child: Center(
+                  child: Text('all'),
+                ),
+              )
+            ]),
+          )),
     );
   }
 }

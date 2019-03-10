@@ -15,6 +15,6 @@ class CircularCheckbox extends StatelessWidget {
           shape: BoxShape.circle,
           color: _isSelected ? Theme.of(context).primaryColor : Colors.transparent,
           border: Border.all(color: Colors.white)),
-    );;
+    );
   }
 }

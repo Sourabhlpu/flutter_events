@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/blocs/home_bloc.dart';
 import 'package:flutter_events/blocs/interests_bloc.dart';
+import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/ui/pages/event_details.dart';
 import 'package:flutter_events/ui/pages/intro.dart';
 import 'package:flutter_events/ui/pages/auth.dart';
 import 'package:flutter_events/utils/custom_colors.dart';
@@ -33,6 +37,22 @@ class MyApp extends StatelessWidget {
         ),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
+        onGenerateRoute: (settings)
+        {
+          String routeName = settings.name;
+
+          if(routeName == '/event_details')
+            {
+              if(settings.arguments is Events)
+                {
+                  Events event = settings.arguments as Events;
+                  return MaterialPageRoute(builder: (BuildContext context) => EventDetail(event));
+                }
+
+            }
+
+            return null;
+        },
         routes: {
           '/auth': (context) => BlocProvider<AuthBloc>(
                 bloc: AuthBloc(),
@@ -42,7 +62,7 @@ class MyApp extends StatelessWidget {
                 bloc: InterestsBloc(),
                 child: Interests(),
               ),
-          '/home': (context) => HomePage()
+          '/home': (context) => HomePage(),
         },
         home: _handleHomeScreen(context));
   }
@@ -68,7 +88,10 @@ class MyApp extends StatelessWidget {
           }
           else if(snapshot.data == CurrentHome.homePage)
             {
-              return HomePage();
+              return BlocProvider<HomeBloc>(
+                bloc: HomeBloc(),
+                child: HomePage(),
+              );
             }
           else if (snapshot.data == CurrentHome.noPage) {
             return Container();
