@@ -62,7 +62,10 @@ class MyApp extends StatelessWidget {
                 bloc: InterestsBloc(),
                 child: Interests(),
               ),
-          '/home': (context) => HomePage(),
+          '/home': (context) => BlocProvider<HomeBloc>(
+            bloc: HomeBloc(),
+            child: HomePage(),
+          ),
         },
         home: _handleHomeScreen(context));
   }

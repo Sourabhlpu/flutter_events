@@ -96,7 +96,7 @@ class AuthBloc implements BlocBase{
             .then((firebaseUser) {
           _isLoadingSubject.add(false);
           _handleSignInSuccess(firebaseUser, SuccessType.successSignup);
-          AppRepository.firestore.collection('user').document().setData({
+          AppRepository.firestore.collection('user').document(user.email).setData({
             'email': user.email,
             'phone': user.phoneNumber,
             'name': user.name

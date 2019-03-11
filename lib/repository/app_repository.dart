@@ -10,6 +10,8 @@ class AppRepository {
   static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   static final Firestore firestore = Firestore.instance;
 
+
+
   CollectionReference refUser = firestore.collection("users");
   CollectionReference refEvents = firestore.collection("events");
   SharedPreferences prefs;
@@ -59,6 +61,11 @@ class AppRepository {
       });
       return events;
     });
+  }
+
+  void addFavorite(Events event)
+  {
+
   }
 }
 

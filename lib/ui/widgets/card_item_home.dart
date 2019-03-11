@@ -11,6 +11,7 @@ class CardListItem extends StatelessWidget {
   final int _index;
   final HomeBloc _bloc;
 
+
   CardListItem(this._event, this._onCardTapped, this._index, this._bloc);
 
   @override

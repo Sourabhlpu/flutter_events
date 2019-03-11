@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/models/events.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
@@ -16,12 +17,12 @@ class _HomePageState extends State<HomePage> {
 
   HomeBloc _bloc;
 
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    Future.delayed(Duration(seconds: 1));
     _bloc = BlocProvider.of<HomeBloc>(context);
 
   }

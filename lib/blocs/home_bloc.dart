@@ -23,6 +23,10 @@ class HomeBloc implements BlocBase{
 
   Stream<bool> get isLoading => _isLoadingSubject.stream;
   final _isLoadingSubject = BehaviorSubject<bool>(seedValue: true);
+
+
+
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -53,12 +57,6 @@ class HomeBloc implements BlocBase{
 
   _addFavorite(int index)
   {
-   /* events[index].rebuild((event) {
-      event..isFavorite = !events[index].isFavorite;
-      events.removeAt(index);
-      events.insert(index, event as Events);
-
-    });*/
 
    var eventNew = events[index]
        .rebuild((event) => event..isFavorite = !events[index].isFavorite);

@@ -31,6 +31,11 @@ class ApplicationBloc implements BlocBase {
   Sink<bool> get shouldShowIntro => _shouldShowIntroSubject.sink;
   final _shouldShowIntroSubject = StreamController<bool>();
 
+
+  Stream<FirebaseUser> get firebaseUser => _userController.stream;
+  final _userController = BehaviorSubject<FirebaseUser>();
+
+
   ApplicationBloc()
   {
     _listenFirebaseAuth();
