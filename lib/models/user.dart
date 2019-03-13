@@ -5,5 +5,7 @@ class User
   final String phoneNumber;
   final String password;
 
+
   User({this.name, this.email, this.phoneNumber, this.password});
+
 }

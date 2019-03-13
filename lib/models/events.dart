@@ -12,6 +12,8 @@ abstract class Events implements Built<Events, EventsBuilder> {
   static Serializer<Events> get serializer => _$eventsSerializer;
 
   @nullable
+  String get id;
+  @nullable
   String get title;
   @nullable
   String get image;

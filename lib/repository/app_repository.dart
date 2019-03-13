@@ -1,20 +1,25 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_events/models/Interest.dart';
 import 'package:flutter_events/models/user.dart';
+import 'package:flutter_events/models/user_fs.dart';
+import 'package:flutter_events/repository/api_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_events/models/events.dart';
-import 'package:built_value/serializer.dart';
-import 'package:flutter_events/models/serializers.dart';
+
 
 class AppRepository {
   static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   static final Firestore firestore = Firestore.instance;
 
-
-
-  CollectionReference refUser = firestore.collection("users");
+  CollectionReference refUser = firestore.collection("user");
   CollectionReference refEvents = firestore.collection("events");
   SharedPreferences prefs;
+
+  final apiProvider = ApiProvider();
+
   AppRepository() {
     _initPrefs();
   }
@@ -35,38 +40,26 @@ class AppRepository {
     prefs.setBool(key, value);
   }
 
-  Future<FirebaseUser> signInWithEmailPassword(User user) {
-    return firebaseAuth.signInWithEmailAndPassword(
-        email: user.email, password: user.password);
-  }
+  Future<FirebaseUser> signInWithEmailPassword(User user) =>
+      apiProvider.signInWithEmailPassword(user);
 
-  Future<FirebaseUser> signInWithPhoneNumber(User user) {
-    //refUser
-  }
+  Future<FirebaseUser> signUpWithEmailPassword(User user) =>
+      apiProvider.signUpUser(user);
 
-  signUpUser(User user) {
-    firebaseAuth
-        .createUserWithEmailAndPassword(
-            email: user.email, password: user.password)
-        .then((user) {});
-  }
+  Future<void> addUserToRemoteDb(User user) => apiProvider.addUserToRemoteDb(user);
 
-  Future<List<Events>> getEventsList() async {
-    List<Events> events = List<Events>();
+  Future<List<Interest>> fetchInterests() => apiProvider.fetchInterests();
 
-    return await refEvents.getDocuments().then((querySnapshot) {
-      querySnapshot.documents.forEach((snapshot) {
-        Events event = standardSerializers.deserializeWith(Events.serializer, snapshot.data);
-        events.add(event);
-      });
-      return events;
-    });
-  }
+  Future<void> saveInterests(List<String> interests, FirebaseUser user) => apiProvider.saveInterests(interests, user);
 
-  void addFavorite(Events event)
-  {
+  Future<List<Events>> getEventsList(UserFs userFs) => apiProvider.getEventsList(userFs);
 
-  }
+  Future<void> addFavorite(Events event, FirebaseUser user)  => apiProvider.addFavorite(event,user);
+
+  Future<UserFs> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromDb(user);
+
+
 }
+
 
 AppRepository repository = AppRepository();

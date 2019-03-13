@@ -22,6 +22,12 @@ class _$EventsSerializer implements StructuredSerializer<Events> {
       serializers.serialize(object.isFavorite,
           specifiedType: const FullType(bool)),
     ];
+    if (object.id != null) {
+      result
+        ..add('id')
+        ..add(serializers.serialize(object.id,
+            specifiedType: const FullType(String)));
+    }
     if (object.title != null) {
       result
         ..add('title')
@@ -85,6 +91,10 @@ class _$EventsSerializer implements StructuredSerializer<Events> {
       iterator.moveNext();
       final dynamic value = iterator.current;
       switch (key) {
+        case 'id':
+          result.id = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
         case 'title':
           result.title = serializers.deserialize(value,
               specifiedType: const FullType(String)) as String;
@@ -130,6 +140,8 @@ class _$EventsSerializer implements StructuredSerializer<Events> {
 
 class _$Events extends Events {
   @override
+  final String id;
+  @override
   final String title;
   @override
   final String image;
@@ -152,7 +164,8 @@ class _$Events extends Events {
       (new EventsBuilder()..update(updates)).build();
 
   _$Events._(
-      {this.title,
+      {this.id,
+      this.title,
       this.image,
       this.location,
       this.date,
@@ -178,6 +191,7 @@ class _$Events extends Events {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is Events &&
+        id == other.id &&
         title == other.title &&
         image == other.image &&
         location == other.location &&
@@ -197,7 +211,9 @@ class _$Events extends Events {
                 $jc(
                     $jc(
                         $jc(
-                            $jc($jc($jc(0, title.hashCode), image.hashCode),
+                            $jc(
+                                $jc($jc($jc(0, id.hashCode), title.hashCode),
+                                    image.hashCode),
                                 location.hashCode),
                             date.hashCode),
                         price.hashCode),
@@ -210,6 +226,7 @@ class _$Events extends Events {
   @override
   String toString() {
     return (newBuiltValueToStringHelper('Events')
+          ..add('id', id)
           ..add('title', title)
           ..add('image', image)
           ..add('location', location)
@@ -225,6 +242,10 @@ class _$Events extends Events {
 
 class EventsBuilder implements Builder<Events, EventsBuilder> {
   _$Events _$v;
+
+  String _id;
+  String get id => _$this._id;
+  set id(String id) => _$this._id = id;
 
   String _title;
   String get title => _$this._title;
@@ -266,6 +287,7 @@ class EventsBuilder implements Builder<Events, EventsBuilder> {
 
   EventsBuilder get _$this {
     if (_$v != null) {
+      _id = _$v.id;
       _title = _$v.title;
       _image = _$v.image;
       _location = _$v.location;
@@ -297,6 +319,7 @@ class EventsBuilder implements Builder<Events, EventsBuilder> {
   _$Events build() {
     final _$result = _$v ??
         new _$Events._(
+            id: id,
             title: title,
             image: image,
             location: location,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/models/events.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
@@ -13,10 +14,10 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> implements AddItemDelegate {
 
   HomeBloc _bloc;
-
+  BuildContext _snackbarContext;
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     _bloc = BlocProvider.of<HomeBloc>(context);
+    _bloc.addItem(this);
 
   }
   @override
@@ -112,6 +114,7 @@ class _HomePageState extends State<HomePage> {
                   initialData: List<Events>(),
                   stream: _bloc.eventList,
                   builder: (context, AsyncSnapshot<List<Events>> snapshots) {
+                    _snackbarContext = context;
 
                     if(snapshots.hasData && snapshots.data.length > 0)
                       {
@@ -149,5 +152,19 @@ class _HomePageState extends State<HomePage> {
             ]),
           )),
     );
+  }
+
+  @override
+  void onError(String message) {
+    // TODO: implement onError
+    final snackbar = SnackBar(content: Text(message));
+
+    Scaffold.of(_snackbarContext).showSnackBar(snackbar);
+    print(message);
+  }
+
+  @override
+  void onSuccess(SuccessType type) {
+    // TODO: implement onSuccess
   }
 }
