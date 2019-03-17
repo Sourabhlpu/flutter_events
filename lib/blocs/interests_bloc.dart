@@ -58,11 +58,16 @@ class InterestsBloc implements BlocBase {
 
     bool isNetworkAvailable = await AppUtils.checkNetworkAvailability();
     if (isNetworkAvailable) {
+
+      _interests = await repository.fetchInterests();
+      _interestListController.sink.add(UnmodifiableListView(_interests));
+      _isLoadingSubject.add(false);
+     /*
       repository.fetchInterests().then((interests) {
         _interests = interests;
         _interestListController.sink.add(UnmodifiableListView(_interests));
         _isLoadingSubject.add(false);
-      }).catchError((_handleError));
+      }).catchError((_handleError));*/
     } else {
       _delegate.onError("No Internet");
       _isLoadingSubject.add(false);

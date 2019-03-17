@@ -13,12 +13,11 @@ import 'package:flutter_events/utils/app_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc implements BlocBase {
-
   List<Events> events;
 
   FirebaseUser _user;
 
-  UserFs _userFs;
+  UserFireStore _userFs;
 
   AddItemDelegate _delegate;
 
@@ -76,24 +75,40 @@ class HomeBloc implements BlocBase {
    * adding favorites to the events list
    */
   _addFavorite(int index) async {
+    _changeFavoriteStatusInEventsList(index);
 
-    // as objects from built value gen are immutable, we create a new object with the
-    // toggled fav value at an index. Add that to the events list and then remove the old one.
+    if (await AppUtils.checkNetworkAvailability()) {
+      if (events[index].isFavorite) {
+        repository
+            .addFavorite(events[index], _user)
+            .then((_) {})
+            .catchError(() {
+          _changeFavoriteStatusInEventsList(index);
+        });
+      } else {
+        repository
+            .removeFavorite(events[index].id, _user)
+            .then((_) {})
+            .catchError(() {
+          _changeFavoriteStatusInEventsList(index);
+        });
+      }
+    } else {
+      _delegate.onError("No Internet");
+      _changeFavoriteStatusInEventsList(index);
+    }
+  }
+
+  // as objects from built value gen are immutable, we create a new object with the
+  // toggled fav value at an index. Add that to the events list and then remove the old one.
+  _changeFavoriteStatusInEventsList(int index) {
     var eventNew = events[index]
         .rebuild((event) => event..isFavorite = !events[index].isFavorite);
 
     events.insert(index, eventNew);
     events.removeAt(index + 1);
 
-    bool isNetworkAvailable = await AppUtils.checkNetworkAvailability();
-
-    if (isNetworkAvailable) {
-      repository.addFavorite(eventNew, _user).then((_) {
-        _eventListController.sink.add(events);
-      });
-    } else {
-      _delegate.onError("No Internet");
-    }
+    _eventListController.add(events);
   }
 
   /*

@@ -52,11 +52,13 @@ class AppRepository {
 
   Future<void> saveInterests(List<String> interests, FirebaseUser user) => apiProvider.saveInterests(interests, user);
 
-  Future<List<Events>> getEventsList(UserFs userFs) => apiProvider.getEventsList(userFs);
+  Future<List<Events>> getEventsList(UserFireStore userFs) => apiProvider.getEventsList(userFs);
 
   Future<void> addFavorite(Events event, FirebaseUser user)  => apiProvider.addFavorite(event,user);
 
-  Future<UserFs> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromDb(user);
+  Future<void> removeFavorite(String eventId, FirebaseUser user)  => apiProvider.removeFavorite(eventId,user);
+
+  Future<UserFireStore> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromDb(user);
 
 
 }

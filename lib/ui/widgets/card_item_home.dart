@@ -27,7 +27,7 @@ class CardListItem extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
         onTap: () {
-          _onCardTapped(_index, _event);
+          _onCardTapped(_index, _event, context);
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,

@@ -11,7 +11,6 @@ import 'package:flutter_events/models/user.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AuthBloc implements BlocBase {
-
   //this is the sink that tells to do the sign up when the user presses the signup btn
   Sink<User> get doSignup => _signupController.sink;
   final _signupController = StreamController<User>();
@@ -26,10 +25,9 @@ class AuthBloc implements BlocBase {
 
   /*
    * an interface that allows callback to the widget that is adding sinks to sign in and signiup
-   * to handle the succes and errors, when then navigates or shows errors respectively.
+   * to handle the success and errors, when then navigates or shows errors respectively.
    */
   AddItemDelegate _delegate;
-
 
   AuthBloc() {
     _listenSignIn();
@@ -50,8 +48,7 @@ class AuthBloc implements BlocBase {
     _signinController.stream.listen((user) async {
       _isLoadingSubject.add(true);
 
-      bool _networkAvailable = await _checkNetworkAvailability();
-      if (_networkAvailable) {
+      if (await _checkNetworkAvailability()) {
         if (user.email.isEmpty && user.phoneNumber.isNotEmpty) {
           //TODO ADD PHONE AUTHENTICATION
         } else {
@@ -75,29 +72,30 @@ class AuthBloc implements BlocBase {
     }).catchError(_handleAuthError);
   }
 
+  void _signupWithEmailPassword(User user) async {
+    _isLoadingSubject.add(true);
+    if (await _checkNetworkAvailability()) {
+      repository.signUpWithEmailPassword(user).then((firebaseUser) {
+        _isLoadingSubject.add(false);
+        _handleSAuthSuccess(firebaseUser, SuccessType.successSignup);
+
+        //after the user is signed up successfully we need to add the user to the
+        // user document in the firestore database.
+        repository.addUserToRemoteDb(user).catchError(_handleAuthError);
+      }).catchError(_handleAuthError);
+    } else {
+      _delegate.onError("No Internet");
+      _isLoadingSubject.add(false);
+    }
+  }
+
   /*
    * similar to signin here we are listening to the signup stream and this method
    * gets called when user taps on signup btn.
    */
   void _listenSignup() {
     _signupController.stream.listen((user) async {
-      _isLoadingSubject.add(true);
-
-      bool _networkAvailable = await _checkNetworkAvailability();
-
-      if (_networkAvailable) {
-        repository.signUpWithEmailPassword(user).then((firebaseUser) {
-          _isLoadingSubject.add(false);
-          _handleSAuthSuccess(firebaseUser, SuccessType.successSignup);
-
-          //after the user is signed up successfully we need to add the user to the
-          // user document in the firestore database.
-          repository.addUserToRemoteDb(user).catchError(_handleAuthError);
-        }).catchError(_handleAuthError);
-      } else {
-        _delegate.onError("No Internet");
-        _isLoadingSubject.add(false);
-      }
+      _signupWithEmailPassword(user);
     });
   }
 
@@ -106,7 +104,6 @@ class AuthBloc implements BlocBase {
    * to the calling widget i.e. auth page to show the authentication errors
    */
   void _handleAuthError(error) {
-    print(error);
     _isLoadingSubject.add(false);
     if (error is PlatformException) {
       final _error = error as PlatformException;
@@ -145,9 +142,6 @@ class AuthBloc implements BlocBase {
 
     if (type == AddSinkType.signIn)
       doSignin.add(item);
-    else if (type == AddSinkType.signUp)
-      doSignup.add(item);
+    else if (type == AddSinkType.signUp) doSignup.add(item);
   }
-
-
 }

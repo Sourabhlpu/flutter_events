@@ -62,7 +62,7 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
                           childAspectRatio: 1.5,
                           mainAxisSpacing: 16.0,
                           crossAxisSpacing: 16.0),
-                      itemCount: snapshots.data.length,
+                      itemCount:  snapshots.data.length,
                       padding:
                           const EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0, bottom: 65),
                       itemBuilder: (context, position) {

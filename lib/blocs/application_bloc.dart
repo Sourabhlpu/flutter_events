@@ -11,31 +11,91 @@ enum CurrentHome { noPage, introPage, interestsPage, authPage, homePage }
 enum AddSinkType { signIn, signUp, interestType, saveInterests }
 
 class ApplicationBloc implements BlocBase {
+
   static FirebaseUser user;
 
-  static UserFs userFs;
+  static UserFireStore userFs;
 
   AppRepository repository = new AppRepository();
 
   //This stream will decide what will be displayed as the home screen depending upon the auth status
 
   Stream<CurrentHome> get currentHome => _currentHomeController.stream;
-  final _currentHomeController =
-      BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
+  final _currentHomeController = BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
 
+  // This is the input sink to set the status of should show intro screen. This sets the preference value when the get started
+  // button is clicked in the intro screens.
   Sink<bool> get shouldShowIntro => _shouldShowIntroSubject.sink;
   final _shouldShowIntroSubject = StreamController<bool>();
 
   Stream<FirebaseUser> get firebaseUser => _userController.stream;
   final _userController = BehaviorSubject<FirebaseUser>();
 
-  Stream<UserFs> get userFirestoreDb => _userControllerDb.stream;
-  final _userControllerDb = BehaviorSubject<UserFs>();
+  Stream<UserFireStore> get userFirestoreDb => _userControllerDb.stream;
+  final _userControllerDb = BehaviorSubject<UserFireStore>();
 
   ApplicationBloc() {
-    _listenFirebaseAuth();
+    _onFirebaseAuthenticationChanged();
+    _onGetStartedClickedFromIntro();
+  }
 
-    _listenIntroBtn();
+  void _onGetStartedClickedFromIntro() {
+    _shouldShowIntroSubject.stream.listen((value) {
+      _setPreference('shouldShowIntro', value);
+    });
+  }
+
+  /*
+   * This method is listening to the auth status from firebase. When the status changes we show the home screen accordingly
+   */
+  void _onFirebaseAuthenticationChanged() {
+
+    AppRepository.firebaseAuth.onAuthStateChanged.listen((firebaseUser) async {
+
+       user = firebaseUser;
+      _userController.add(firebaseUser);
+
+      _setLandingPage();
+    });
+  }
+
+  _setLandingPage() {
+    if (_isUserAuthenticated()) {
+      _openHomePage();
+    } else {
+      if (_shouldShowIntroPage()) {
+        _openIntroPage();
+      } else
+        _openAuthPage();
+    }
+  }
+
+  _openHomePage() {
+    _currentHomeController.add(CurrentHome.homePage);
+  }
+
+  _openAuthPage() {
+    _currentHomeController.add(CurrentHome.authPage);
+  }
+
+  _openIntroPage() {
+    _currentHomeController.add(CurrentHome.introPage);
+  }
+
+  bool _isUserAuthenticated() {
+    return user != null;
+  }
+
+  bool _shouldShowIntroPage() {
+    return _getBoolFromPreference('shouldShowIntro');
+  }
+
+  _setPreference(String key, var value) {
+    repository.setPrefsBool(key, value);
+  }
+
+  bool _getBoolFromPreference(String key) {
+    return repository.getBoolFromPrefs(key);
   }
 
   @override
@@ -43,32 +103,5 @@ class ApplicationBloc implements BlocBase {
     // TODO: implement dispose
     _currentHomeController.close();
     _shouldShowIntroSubject.close();
-  }
-
-  /*
-   * This method is listening to the auth status from firebase. When the status changes we show the home screen accordingly
-   */
-  void _listenFirebaseAuth() {
-    AppRepository.firebaseAuth.onAuthStateChanged.listen((firebaseUser) async {
-      if (firebaseUser != null) {
-        user = firebaseUser;
-
-        _currentHomeController.add(CurrentHome.homePage);
-        _userController.add(firebaseUser);
-        userFs = await repository.getUserFromDb(user);
-      } else {
-        if (repository.getBoolFromPrefs('shouldShowIntro')) {
-          _currentHomeController.add(CurrentHome.introPage);
-        } else {
-          _currentHomeController.add(CurrentHome.authPage);
-        }
-      }
-    });
-  }
-
-  void _listenIntroBtn() {
-    _shouldShowIntroSubject.stream.listen((value) {
-      repository.setPrefsBool('shouldShowIntro', value);
-    });
   }
 }

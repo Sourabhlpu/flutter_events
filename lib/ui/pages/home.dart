@@ -3,6 +3,7 @@ import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/ui/pages/profile.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,9 +16,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> implements AddItemDelegate {
-
   HomeBloc _bloc;
   BuildContext _snackbarContext;
+  int _currentBottomBarIndex = 0;
 
   @override
   void initState() {
@@ -26,132 +27,84 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
 
     _bloc = BlocProvider.of<HomeBloc>(context);
     _bloc.addItem(this);
-
   }
+
+  _onCardItemTapped(int index, Events event, BuildContext context) {
+    Navigator.pushNamed(context, '/event_details', arguments: event);
+  }
+
   @override
   Widget build(BuildContext context) {
-    _onCardItemTapped(int index, Events event) {
-      print("card $index tapped");
-      Navigator.pushNamed(context, '/event_details', arguments: event);
-    }
+    return Scaffold(
+        bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _currentBottomBarIndex,
+            type: BottomNavigationBarType.fixed,
+            onTap: ((index) {
+              setState(() {
+                _setCurrentBottomBarIndex(index);
+              });
+            }),
+            items: _getBottomNavigationBarItems()),
+        body: _getBody());
+  }
 
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-          appBar: AppBar(
-            centerTitle: true,
-            title: Text(
-              'Welcome',
-              style: TextStyle(color: Colors.black),
-            ),
-            backgroundColor: Colors.white,
-            bottom: TabBar(
-              tabs: [
-                Tab(
-                  text: 'Recommended',
-                ),
-                Tab(
-                  text: 'Upcoming',
-                ),
-                Tab(
-                  text: 'Popular',
-                ),
-                Tab(
-                  text: 'All',
-                )
-              ],
-              isScrollable: true,
-              labelColor: Theme.of(context).primaryColor,
-              unselectedLabelColor: Colors.grey,
-            ),
+  List<Widget> _getTabs() {
+    return [
+      Tab(
+        text: 'Recommended',
+      ),
+      Tab(
+        text: 'Upcoming',
+      ),
+      Tab(
+        text: 'Popular',
+      ),
+      Tab(
+        text: 'All',
+      )
+    ];
+  }
+
+  List<BottomNavigationBarItem> _getBottomNavigationBarItems() {
+    return <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+          icon: Icon(
+            Icons.home,
           ),
-          bottomNavigationBar: BottomNavigationBar(
-              currentIndex: 0,
-              type: BottomNavigationBarType.fixed,
-              items: <BottomNavigationBarItem>[
-                BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.home,
-                      color: Colors.grey,
-                    ),
-                    title: Text(
-                      'Home',
-                      style: TextStyle(color: Colors.grey),
-                    )),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.search,
-                    color: Colors.grey,
-                  ),
-                  title: Text(
-                    'Explore',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(FontAwesomeIcons.ticketAlt, color: Colors.grey),
-                  title: Text(
-                    'My Tickets',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    FontAwesomeIcons.userCircle,
-                    color: Colors.grey,
-                  ),
-                  title: Text(
-                    'Profile',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ),
-              ]),
-          body: LoadingInfo(
-            isLoading: _bloc.isLoading,
-            child: TabBarView(children: [
-              Tab(
-                child: StreamBuilder(
-                  initialData: List<Events>(),
-                  stream: _bloc.eventList,
-                  builder: (context, AsyncSnapshot<List<Events>> snapshots) {
-                    _snackbarContext = context;
-
-                    if(snapshots.hasData && snapshots.data.length > 0)
-                      {
-                        return ListView.builder(
-                            padding: const EdgeInsets.all(8.0),
-                            itemBuilder: (BuildContext context, int index) {
-                              return CardListItem(
-                                  snapshots.data[index], _onCardItemTapped, index, _bloc);
-                            });
-                      }
-
-                      else
-                        {
-                          return Container();
-                        }
-
-                  }
-                ),
-              ),
-              Tab(
-                child: Center(
-                  child: Text('upcoming'),
-                ),
-              ),
-              Tab(
-                child: Center(
-                  child: Text('popular'),
-                ),
-              ),
-              Tab(
-                child: Center(
-                  child: Text('all'),
-                ),
-              )
-            ]),
+          title: Text(
+            'Home',
+            style: TextStyle(color: Colors.grey),
           )),
-    );
+      BottomNavigationBarItem(
+        icon: Icon(
+          Icons.search,
+        ),
+        title: Text(
+          'Explore',
+          style: TextStyle(),
+        ),
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(FontAwesomeIcons.ticketAlt),
+        title: Text(
+          'My Tickets',
+          style: TextStyle(),
+        ),
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(
+          FontAwesomeIcons.userCircle,
+        ),
+        title: Text(
+          'Profile',
+          style: TextStyle(),
+        ),
+      ),
+    ];
+  }
+
+  _setCurrentBottomBarIndex(int index) {
+    _currentBottomBarIndex = index;
   }
 
   @override
@@ -166,5 +119,75 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
   @override
   void onSuccess(SuccessType type) {
     // TODO: implement onSuccess
+  }
+
+  _getBody() {
+    if (_currentBottomBarIndex == 3) {
+      return ProfilePage();
+    } else {
+      return _getHomeForBottomNav();
+    }
+  }
+
+  _getHomeForBottomNav() {
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: Text(
+            'Welcome',
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.white,
+          bottom: TabBar(
+            tabs: _getTabs(),
+            isScrollable: true,
+            labelColor: Theme.of(context).primaryColor,
+            unselectedLabelColor: Colors.grey,
+          ),
+        ),
+        body: LoadingInfo(
+          isLoading: _bloc.isLoading,
+          child: TabBarView(children: [
+            Tab(
+              child: StreamBuilder(
+                  initialData: List<Events>(),
+                  stream: _bloc.eventList,
+                  builder: (context, AsyncSnapshot<List<Events>> snapshots) {
+                    _snackbarContext = context;
+
+                    if (snapshots.hasData && snapshots.data.length > 0) {
+                      return ListView.builder(
+                          padding: const EdgeInsets.all(8.0),
+                          itemCount: snapshots.data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return CardListItem(snapshots.data[index],
+                                _onCardItemTapped, index, _bloc);
+                          });
+                    } else {
+                      return Container();
+                    }
+                  }),
+            ),
+            Tab(
+              child: Center(
+                child: Text('upcoming'),
+              ),
+            ),
+            Tab(
+              child: Center(
+                child: Text('popular'),
+              ),
+            ),
+            Tab(
+              child: Center(
+                child: Text('all'),
+              ),
+            )
+          ]),
+        ),
+      ),
+    );
   }
 }
