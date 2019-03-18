@@ -21,6 +21,8 @@ class HomeBloc implements BlocBase {
 
   AddItemDelegate _delegate;
 
+  ApplicationBloc _applicationBloc;
+
   //this stream is for streaming the list of events to the home screen
   Stream<List<Events>> get eventList => _eventListController.stream;
   final _eventListController = BehaviorSubject<List<Events>>();
@@ -40,13 +42,17 @@ class HomeBloc implements BlocBase {
     _isLoadingSubject.close();
   }
 
-  HomeBloc() {
+  HomeBloc(ApplicationBloc bloc) {
+
+    _applicationBloc = bloc;
     _manageFavorites();
 
     _user = ApplicationBloc.user;
-    _userFs = ApplicationBloc.userFs;
 
-    _fetchEvents();
+    _applicationBloc.userFirestore.listen((userFs) {
+      _userFs = userFs;
+      _fetchEvents();
+    });
   }
 
   /*

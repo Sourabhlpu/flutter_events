@@ -3,8 +3,8 @@ class UserFireStore
   final String name;
   final String email;
   final String phone;
-  final Set<String> interests;
-  final Set<String> favorites;
+  final List<dynamic> interests;
+  final List<dynamic> favorites;
 
   UserFireStore(this.name, this.email, this.phone, this.interests, this.favorites);
 

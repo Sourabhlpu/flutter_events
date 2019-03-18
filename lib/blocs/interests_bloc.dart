@@ -98,7 +98,7 @@ class InterestsBloc implements BlocBase {
       for (Interest interest in _interests) {
         if (interest.isSelected) {
           _isInterestSelected = true;
-          savedInterests.add(interest.interestId);
+          savedInterests.add(interest.interestName);
         }
       }
 

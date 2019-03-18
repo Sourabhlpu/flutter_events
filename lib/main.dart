@@ -31,6 +31,8 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
     ));*/
 
+   var  bloc = BlocProvider.of<ApplicationBloc>(context);
+
     return MaterialApp(
         theme: ThemeData(
           primarySwatch: customPrimaryColor,
@@ -63,14 +65,14 @@ class MyApp extends StatelessWidget {
                 child: Interests(),
               ),
           '/home': (context) => BlocProvider<HomeBloc>(
-            bloc: HomeBloc(),
+            bloc: HomeBloc(bloc),
             child: HomePage(),
           ),
         },
-        home: _handleHomeScreen(context));
+        home: _handleHomeScreen(context, bloc));
   }
 
-  Widget _handleHomeScreen(BuildContext context) {
+  Widget _handleHomeScreen(BuildContext context, ApplicationBloc bloc) {
     return StreamBuilder<CurrentHome>(
       stream: BlocProvider.of<ApplicationBloc>(context).currentHome,
       initialData: CurrentHome.noPage,
@@ -92,7 +94,7 @@ class MyApp extends StatelessWidget {
           else if(snapshot.data == CurrentHome.homePage)
             {
               return BlocProvider<HomeBloc>(
-                bloc: HomeBloc(),
+                bloc: HomeBloc(bloc),
                 child: HomePage(),
               );
             }

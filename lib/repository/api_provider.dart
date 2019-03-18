@@ -71,6 +71,9 @@ class ApiProvider {
       querySnapshot.documents.forEach((snapshot) {
         Map<String, String> map = {'id': snapshot.documentID};
         snapshot.data.addAll(map);
+
+        if(userFs.favorites != null && userFs.favorites.contains(snapshot.documentID))
+          snapshot.data['isFavorite'] = true;
         Events event = standardSerializers.deserializeWith(Events.serializer, snapshot.data);
         events.add(event);
       });
@@ -86,7 +89,7 @@ class ApiProvider {
     return refUser.document(user.email).setData(data, merge: true);
   }
 
-  Future<void> addUserToRemoteDb(User user) {
+  Future<void> addUserToFirestore(User user) {
    return  refUser.document(user.email).setData({
       'name' : user.name,
       'email': user.email,
@@ -114,5 +117,11 @@ class ApiProvider {
    });
   }
 
-  getUserFromDb(FirebaseUser user) {}
+  Future<UserFireStore> getUserFromFirestore(FirebaseUser user) {
+
+    return refUser.document(user.email).get().then((snapshots){
+
+      return UserFireStore.fromJson(snapshots.data);
+    });
+  }
 }

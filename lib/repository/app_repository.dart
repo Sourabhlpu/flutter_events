@@ -46,7 +46,7 @@ class AppRepository {
   Future<FirebaseUser> signUpWithEmailPassword(User user) =>
       apiProvider.signUpUser(user);
 
-  Future<void> addUserToRemoteDb(User user) => apiProvider.addUserToRemoteDb(user);
+  Future<void> addUserToRemoteDb(User user) => apiProvider.addUserToFirestore(user);
 
   Future<List<Interest>> fetchInterests() => apiProvider.fetchInterests();
 
@@ -58,7 +58,7 @@ class AppRepository {
 
   Future<void> removeFavorite(String eventId, FirebaseUser user)  => apiProvider.removeFavorite(eventId,user);
 
-  Future<UserFireStore> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromDb(user);
+  Future<UserFireStore> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromFirestore(user);
 
 
 }

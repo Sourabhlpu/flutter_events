@@ -11,17 +11,19 @@ enum CurrentHome { noPage, introPage, interestsPage, authPage, homePage }
 enum AddSinkType { signIn, signUp, interestType, saveInterests }
 
 class ApplicationBloc implements BlocBase {
-
   static FirebaseUser user;
 
   static UserFireStore userFs;
+
+
 
   AppRepository repository = new AppRepository();
 
   //This stream will decide what will be displayed as the home screen depending upon the auth status
 
   Stream<CurrentHome> get currentHome => _currentHomeController.stream;
-  final _currentHomeController = BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
+  final _currentHomeController =
+      BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
 
   // This is the input sink to set the status of should show intro screen. This sets the preference value when the get started
   // button is clicked in the intro screens.
@@ -31,8 +33,10 @@ class ApplicationBloc implements BlocBase {
   Stream<FirebaseUser> get firebaseUser => _userController.stream;
   final _userController = BehaviorSubject<FirebaseUser>();
 
-  Stream<UserFireStore> get userFirestoreDb => _userControllerDb.stream;
-  final _userControllerDb = BehaviorSubject<UserFireStore>();
+  Stream<UserFireStore> get userFirestore => _userFirestoreController.stream;
+  final _userFirestoreController = BehaviorSubject<UserFireStore>();
+
+
 
   ApplicationBloc() {
     _onFirebaseAuthenticationChanged();
@@ -49,11 +53,10 @@ class ApplicationBloc implements BlocBase {
    * This method is listening to the auth status from firebase. When the status changes we show the home screen accordingly
    */
   void _onFirebaseAuthenticationChanged() {
-
     AppRepository.firebaseAuth.onAuthStateChanged.listen((firebaseUser) async {
-
-       user = firebaseUser;
+      user = firebaseUser;
       _userController.add(firebaseUser);
+      _getUserFromFirestore();
 
       _setLandingPage();
     });
@@ -103,5 +106,12 @@ class ApplicationBloc implements BlocBase {
     // TODO: implement dispose
     _currentHomeController.close();
     _shouldShowIntroSubject.close();
+    _userFirestoreController.close();
+    _userController.close();
+  }
+
+  _getUserFromFirestore() async {
+    userFs = await repository.getUserFromDb(user);
+    _userFirestoreController.add(userFs);
   }
 }
