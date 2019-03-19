@@ -5,15 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/Interest.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/interest.dart';
+import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/models/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc implements BlocBase {
-  List<Events> events;
+  List<Event> events;
 
   FirebaseUser _user;
 
@@ -24,8 +24,8 @@ class HomeBloc implements BlocBase {
   ApplicationBloc _applicationBloc;
 
   //this stream is for streaming the list of events to the home screen
-  Stream<List<Events>> get eventList => _eventListController.stream;
-  final _eventListController = BehaviorSubject<List<Events>>();
+  Stream<List<Event>> get eventList => _eventListController.stream;
+  final _eventListController = BehaviorSubject<List<Event>>();
 
   //this streams is for adding/removing favorites
   Sink<int> get addFavorite => _favoriteController.sink;

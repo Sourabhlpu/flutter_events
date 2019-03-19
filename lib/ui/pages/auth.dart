@@ -37,7 +37,6 @@ class _AuthenticationState extends State<Authentication>
 
     _bloc = BlocProvider.of<AuthBloc>(context);
   }
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(

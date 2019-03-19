@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_events/models/Interest.dart';
+import 'package:flutter_events/models/interest.dart';
 import 'package:flutter_events/models/user.dart';
 import 'package:flutter_events/models/user_fs.dart';
 import 'package:flutter_events/repository/api_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/event.dart';
 
 
 class AppRepository {
@@ -52,9 +52,9 @@ class AppRepository {
 
   Future<void> saveInterests(List<String> interests, FirebaseUser user) => apiProvider.saveInterests(interests, user);
 
-  Future<List<Events>> getEventsList(UserFireStore userFs) => apiProvider.getEventsList(userFs);
+  Future<List<Event>> getEventsList(UserFireStore userFs) => apiProvider.getEventsList(userFs);
 
-  Future<void> addFavorite(Events event, FirebaseUser user)  => apiProvider.addFavorite(event,user);
+  Future<void> addFavorite(Event event, FirebaseUser user)  => apiProvider.addFavorite(event,user);
 
   Future<void> removeFavorite(String eventId, FirebaseUser user)  => apiProvider.removeFavorite(eventId,user);
 

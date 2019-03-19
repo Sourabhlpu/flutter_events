@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/models/event.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/ui/pages/profile.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
     _bloc.addItem(this);
   }
 
-  _onCardItemTapped(int index, Events event, BuildContext context) {
+  _onCardItemTapped(int index, Event event, BuildContext context) {
     Navigator.pushNamed(context, '/event_details', arguments: event);
   }
 
@@ -152,9 +152,9 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
           child: TabBarView(children: [
             Tab(
               child: StreamBuilder(
-                  initialData: List<Events>(),
+                  initialData: List<Event>(),
                   stream: _bloc.eventList,
-                  builder: (context, AsyncSnapshot<List<Events>> snapshots) {
+                  builder: (context, AsyncSnapshot<List<Event>> snapshots) {
                     _snackbarContext = context;
 
                     if (snapshots.hasData && snapshots.data.length > 0) {

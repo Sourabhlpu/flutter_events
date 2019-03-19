@@ -3,7 +3,7 @@ import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/blocs/interests_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/Interest.dart';
+import 'package:flutter_events/models/interest.dart';
 import 'package:flutter_events/ui/widgets/interest_grid_item.dart';
 import 'dart:collection';
 import 'package:flutter_events/ui/widgets/loading_info.dart';

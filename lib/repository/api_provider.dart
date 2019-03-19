@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_events/models/Interest.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/interest.dart';
+import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/models/serializers.dart';
 import 'package:flutter_events/models/user.dart';
 import 'package:flutter_events/models/user_fs.dart';
@@ -33,8 +33,14 @@ class ApiProvider {
 
     return firestore.collection("interests").getDocuments().then((snapshot){
       snapshot.documents.forEach((document){
-        interests.add(Interest(document['interestImage'],
-            document['interestName'], false, document.documentID));
+
+        //adding an id to the interest and then also adding isSelected as false as in
+        // built value the initialization of value is not easy.
+        Map<String, dynamic> addFieldsToInterests = {'id': document.documentID, 'isSelected' : false};
+        document.data.addAll(addFieldsToInterests);
+
+        Interest interst = standardSerializers.deserializeWith(Interest.serializer, document.data);
+        interests.add(interst);
       });
 
       return interests;
@@ -65,16 +71,16 @@ class ApiProvider {
   }
 
   getEventsList(UserFireStore userFs) {
-    List<Events> events = List<Events>();
+    List<Event> events = List<Event>();
 
     return  refEvents.getDocuments().then((querySnapshot) {
       querySnapshot.documents.forEach((snapshot) {
-        Map<String, String> map = {'id': snapshot.documentID};
+        Map<String, dynamic> map = {'id': snapshot.documentID};
         snapshot.data.addAll(map);
 
         if(userFs.favorites != null && userFs.favorites.contains(snapshot.documentID))
           snapshot.data['isFavorite'] = true;
-        Events event = standardSerializers.deserializeWith(Events.serializer, snapshot.data);
+        Event event = standardSerializers.deserializeWith(Event.serializer, snapshot.data);
         events.add(event);
       });
       return events;
@@ -97,7 +103,7 @@ class ApiProvider {
     });
   }
 
-  Future<void> addFavorite(Events event, FirebaseUser user) {
+  Future<void> addFavorite(Event event, FirebaseUser user) {
 
     List<String> eventId = [event.id];
 

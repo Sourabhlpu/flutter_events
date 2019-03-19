@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter_events/blocs/home_bloc.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/icon_white_background.dart';
 
 class CardListItem extends StatelessWidget {
-  Events _event;
+  Event _event;
   final Function _onCardTapped;
   final int _index;
   final HomeBloc _bloc;

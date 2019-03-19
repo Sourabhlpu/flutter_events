@@ -5,7 +5,8 @@ import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/blocs/home_bloc.dart';
 import 'package:flutter_events/blocs/interests_bloc.dart';
 import 'package:flutter_events/models/event.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/ui/pages/create_event.dart';
 import 'package:flutter_events/ui/pages/event_details.dart';
 import 'package:flutter_events/ui/pages/intro.dart';
 import 'package:flutter_events/ui/pages/auth.dart';
@@ -45,9 +46,9 @@ class MyApp extends StatelessWidget {
 
           if(routeName == '/event_details')
             {
-              if(settings.arguments is Events)
+              if(settings.arguments is Event)
                 {
-                  Events event = settings.arguments as Events;
+                  Event event = settings.arguments as Event;
                   return MaterialPageRoute(builder: (BuildContext context) => EventDetail(event));
                 }
 
@@ -68,6 +69,7 @@ class MyApp extends StatelessWidget {
             bloc: HomeBloc(bloc),
             child: HomePage(),
           ),
+          '/create_event': (context) => CreateEvent()
         },
         home: _handleHomeScreen(context, bloc));
   }

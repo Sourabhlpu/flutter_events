@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_events/models/event.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/event.dart';
 import 'package:flutter_events/ui/widgets/icon_white_background.dart';
 import 'package:flutter_events/ui/widgets/primary_btn.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EventDetail extends StatefulWidget {
-  final Events _event;
+  final Event _event;
 
   EventDetail(this._event);
 

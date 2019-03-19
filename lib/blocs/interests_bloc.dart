@@ -6,7 +6,7 @@ import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/Interest.dart';
+import 'package:flutter_events/models/interest.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:rxdart/rxdart.dart';
@@ -80,7 +80,11 @@ class InterestsBloc implements BlocBase {
    */
   void _interestSelection() {
     _interestSelectionController.stream.listen((index) {
-      _interests[index].setIsSelected = !_interests[index].isSelected;
+
+      var interest = _interests[index].rebuild((interest) => interest.isSelected = !_interests[index].isSelected);
+
+      _interests.insert(index, interest);
+      _interests.removeAt(index + 1);
 
       _interestListController.add(UnmodifiableListView(_interests));
     });

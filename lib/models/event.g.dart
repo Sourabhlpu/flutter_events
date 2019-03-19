@@ -1,21 +1,21 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'events.dart';
+part of 'event.dart';
 
 // **************************************************************************
 // BuiltValueGenerator
 // **************************************************************************
 
-Serializer<Events> _$eventsSerializer = new _$EventsSerializer();
+Serializer<Event> _$eventSerializer = new _$EventSerializer();
 
-class _$EventsSerializer implements StructuredSerializer<Events> {
+class _$EventSerializer implements StructuredSerializer<Event> {
   @override
-  final Iterable<Type> types = const [Events, _$Events];
+  final Iterable<Type> types = const [Event, _$Event];
   @override
-  final String wireName = 'Events';
+  final String wireName = 'Event';
 
   @override
-  Iterable serialize(Serializers serializers, Events object,
+  Iterable serialize(Serializers serializers, Event object,
       {FullType specifiedType = FullType.unspecified}) {
     final result = <Object>[
       'isFavorite',
@@ -81,9 +81,9 @@ class _$EventsSerializer implements StructuredSerializer<Events> {
   }
 
   @override
-  Events deserialize(Serializers serializers, Iterable serialized,
+  Event deserialize(Serializers serializers, Iterable serialized,
       {FullType specifiedType = FullType.unspecified}) {
-    final result = new EventsBuilder();
+    final result = new EventBuilder();
 
     final iterator = serialized.iterator;
     while (iterator.moveNext()) {
@@ -138,7 +138,7 @@ class _$EventsSerializer implements StructuredSerializer<Events> {
   }
 }
 
-class _$Events extends Events {
+class _$Event extends Event {
   @override
   final String id;
   @override
@@ -160,10 +160,10 @@ class _$Events extends Events {
   @override
   final bool isFavorite;
 
-  factory _$Events([void updates(EventsBuilder b)]) =>
-      (new EventsBuilder()..update(updates)).build();
+  factory _$Event([void updates(EventBuilder b)]) =>
+      (new EventBuilder()..update(updates)).build();
 
-  _$Events._(
+  _$Event._(
       {this.id,
       this.title,
       this.image,
@@ -176,21 +176,21 @@ class _$Events extends Events {
       this.isFavorite})
       : super._() {
     if (isFavorite == null) {
-      throw new BuiltValueNullFieldError('Events', 'isFavorite');
+      throw new BuiltValueNullFieldError('Event', 'isFavorite');
     }
   }
 
   @override
-  Events rebuild(void updates(EventsBuilder b)) =>
+  Event rebuild(void updates(EventBuilder b)) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  EventsBuilder toBuilder() => new EventsBuilder()..replace(this);
+  EventBuilder toBuilder() => new EventBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is Events &&
+    return other is Event &&
         id == other.id &&
         title == other.title &&
         image == other.image &&
@@ -225,7 +225,7 @@ class _$Events extends Events {
 
   @override
   String toString() {
-    return (newBuiltValueToStringHelper('Events')
+    return (newBuiltValueToStringHelper('Event')
           ..add('id', id)
           ..add('title', title)
           ..add('image', image)
@@ -240,8 +240,8 @@ class _$Events extends Events {
   }
 }
 
-class EventsBuilder implements Builder<Events, EventsBuilder> {
-  _$Events _$v;
+class EventBuilder implements Builder<Event, EventBuilder> {
+  _$Event _$v;
 
   String _id;
   String get id => _$this._id;
@@ -283,9 +283,9 @@ class EventsBuilder implements Builder<Events, EventsBuilder> {
   bool get isFavorite => _$this._isFavorite;
   set isFavorite(bool isFavorite) => _$this._isFavorite = isFavorite;
 
-  EventsBuilder();
+  EventBuilder();
 
-  EventsBuilder get _$this {
+  EventBuilder get _$this {
     if (_$v != null) {
       _id = _$v.id;
       _title = _$v.title;
@@ -303,22 +303,22 @@ class EventsBuilder implements Builder<Events, EventsBuilder> {
   }
 
   @override
-  void replace(Events other) {
+  void replace(Event other) {
     if (other == null) {
       throw new ArgumentError.notNull('other');
     }
-    _$v = other as _$Events;
+    _$v = other as _$Event;
   }
 
   @override
-  void update(void updates(EventsBuilder b)) {
+  void update(void updates(EventBuilder b)) {
     if (updates != null) updates(this);
   }
 
   @override
-  _$Events build() {
+  _$Event build() {
     final _$result = _$v ??
-        new _$Events._(
+        new _$Event._(
             id: id,
             title: title,
             image: image,

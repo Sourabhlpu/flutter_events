@@ -4,7 +4,8 @@ library serializers;
 import 'package:built_value/serializer.dart';
 import 'package:built_value/standard_json_plugin.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:flutter_events/models/events.dart';
+import 'package:flutter_events/models/interest.dart';
+import 'package:flutter_events/models/event.dart';
 import 'timestamp_serializer.dart';
 
 
@@ -22,7 +23,8 @@ part 'serializers.g.dart';
 ///
 /// You usually only need to do this once per project.
 @SerializersFor(const [
-  Events,
+  Event,
+  Interest,
 ])
 Serializers serializers = _$serializers;
 

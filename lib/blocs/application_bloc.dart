@@ -11,6 +11,7 @@ enum CurrentHome { noPage, introPage, interestsPage, authPage, homePage }
 enum AddSinkType { signIn, signUp, interestType, saveInterests }
 
 class ApplicationBloc implements BlocBase {
+
   static FirebaseUser user;
 
   static UserFireStore userFs;
@@ -54,9 +55,10 @@ class ApplicationBloc implements BlocBase {
    */
   void _onFirebaseAuthenticationChanged() {
     AppRepository.firebaseAuth.onAuthStateChanged.listen((firebaseUser) async {
+
       user = firebaseUser;
       _userController.add(firebaseUser);
-      _getUserFromFirestore();
+
 
       _setLandingPage();
     });
@@ -64,6 +66,7 @@ class ApplicationBloc implements BlocBase {
 
   _setLandingPage() {
     if (_isUserAuthenticated()) {
+      _getUserFromFirestore();
       _openHomePage();
     } else {
       if (_shouldShowIntroPage()) {
