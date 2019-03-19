@@ -7,7 +7,7 @@ import 'package:flutter_events/delegates/addItem.dart';
 
 import '../widgets/primary_btn.dart';
 import '../widgets/primary_btn_white.dart';
-import 'package:flutter_events/models/user.dart';
+import 'package:flutter_events/models/users/user.dart';
 import '../widgets/loading_info.dart';
 
 class Authentication extends StatefulWidget {

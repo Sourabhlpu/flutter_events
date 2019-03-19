@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/models/user_fs.dart';
+import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:rxdart/rxdart.dart';
 

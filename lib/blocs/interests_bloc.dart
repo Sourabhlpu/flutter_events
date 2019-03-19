@@ -6,7 +6,7 @@ import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/interest.dart';
+import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:rxdart/rxdart.dart';

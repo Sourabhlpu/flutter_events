@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/event.dart';
-import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/pages/profile.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';

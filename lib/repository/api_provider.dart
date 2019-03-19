@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_events/models/interest.dart';
-import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/models/interests/interest.dart';
+import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/models/serializers.dart';
-import 'package:flutter_events/models/user.dart';
-import 'package:flutter_events/models/user_fs.dart';
+import 'package:flutter_events/models/users/user.dart';
+import 'package:flutter_events/models/users/user_fs.dart';
 
 class ApiProvider {
   static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;

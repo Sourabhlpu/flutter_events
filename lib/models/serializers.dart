@@ -4,9 +4,10 @@ library serializers;
 import 'package:built_value/serializer.dart';
 import 'package:built_value/standard_json_plugin.dart';
 import 'package:built_collection/built_collection.dart';
-import 'package:flutter_events/models/interest.dart';
-import 'package:flutter_events/models/event.dart';
+import 'package:flutter_events/models/interests/interest.dart';
+import 'package:flutter_events/models/events/event.dart';
 import 'timestamp_serializer.dart';
+import 'users/user_fs.dart';
 
 
 part 'serializers.g.dart';
@@ -25,6 +26,7 @@ part 'serializers.g.dart';
 @SerializersFor(const [
   Event,
   Interest,
+  UserFireStore,
 ])
 Serializers serializers = _$serializers;
 
