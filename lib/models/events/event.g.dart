@@ -17,11 +17,7 @@ class _$EventSerializer implements StructuredSerializer<Event> {
   @override
   Iterable serialize(Serializers serializers, Event object,
       {FullType specifiedType = FullType.unspecified}) {
-    final result = <Object>[
-      'isFavorite',
-      serializers.serialize(object.isFavorite,
-          specifiedType: const FullType(bool)),
-    ];
+    final result = <Object>[];
     if (object.id != null) {
       result
         ..add('id')
@@ -74,6 +70,49 @@ class _$EventSerializer implements StructuredSerializer<Event> {
       result
         ..add('category')
         ..add(serializers.serialize(object.category,
+            specifiedType: const FullType(String)));
+    }
+    if (object.isFavorite != null) {
+      result
+        ..add('isFavorite')
+        ..add(serializers.serialize(object.isFavorite,
+            specifiedType: const FullType(bool)));
+    }
+    if (object.eventType != null) {
+      result
+        ..add('eventType')
+        ..add(serializers.serialize(object.eventType,
+            specifiedType:
+                const FullType(BuiltList, const [const FullType(String)])));
+    }
+    if (object.startDate != null) {
+      result
+        ..add('startDate')
+        ..add(serializers.serialize(object.startDate,
+            specifiedType: const FullType(String)));
+    }
+    if (object.startTime != null) {
+      result
+        ..add('startTime')
+        ..add(serializers.serialize(object.startTime,
+            specifiedType: const FullType(String)));
+    }
+    if (object.endDate != null) {
+      result
+        ..add('endDate')
+        ..add(serializers.serialize(object.endDate,
+            specifiedType: const FullType(String)));
+    }
+    if (object.endTime != null) {
+      result
+        ..add('endTime')
+        ..add(serializers.serialize(object.endTime,
+            specifiedType: const FullType(String)));
+    }
+    if (object.entryFees != null) {
+      result
+        ..add('entryFees')
+        ..add(serializers.serialize(object.entryFees,
             specifiedType: const FullType(String)));
     }
 
@@ -131,6 +170,32 @@ class _$EventSerializer implements StructuredSerializer<Event> {
           result.isFavorite = serializers.deserialize(value,
               specifiedType: const FullType(bool)) as bool;
           break;
+        case 'eventType':
+          result.eventType.replace(serializers.deserialize(value,
+                  specifiedType:
+                      const FullType(BuiltList, const [const FullType(String)]))
+              as BuiltList);
+          break;
+        case 'startDate':
+          result.startDate = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'startTime':
+          result.startTime = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'endDate':
+          result.endDate = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'endTime':
+          result.endTime = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
+        case 'entryFees':
+          result.entryFees = serializers.deserialize(value,
+              specifiedType: const FullType(String)) as String;
+          break;
       }
     }
 
@@ -159,6 +224,18 @@ class _$Event extends Event {
   final String category;
   @override
   final bool isFavorite;
+  @override
+  final BuiltList<String> eventType;
+  @override
+  final String startDate;
+  @override
+  final String startTime;
+  @override
+  final String endDate;
+  @override
+  final String endTime;
+  @override
+  final String entryFees;
 
   factory _$Event([void updates(EventBuilder b)]) =>
       (new EventBuilder()..update(updates)).build();
@@ -173,12 +250,14 @@ class _$Event extends Event {
       this.by,
       this.about,
       this.category,
-      this.isFavorite})
-      : super._() {
-    if (isFavorite == null) {
-      throw new BuiltValueNullFieldError('Event', 'isFavorite');
-    }
-  }
+      this.isFavorite,
+      this.eventType,
+      this.startDate,
+      this.startTime,
+      this.endDate,
+      this.endTime,
+      this.entryFees})
+      : super._();
 
   @override
   Event rebuild(void updates(EventBuilder b)) =>
@@ -200,7 +279,13 @@ class _$Event extends Event {
         by == other.by &&
         about == other.about &&
         category == other.category &&
-        isFavorite == other.isFavorite;
+        isFavorite == other.isFavorite &&
+        eventType == other.eventType &&
+        startDate == other.startDate &&
+        startTime == other.startTime &&
+        endDate == other.endDate &&
+        endTime == other.endTime &&
+        entryFees == other.entryFees;
   }
 
   @override
@@ -212,15 +297,31 @@ class _$Event extends Event {
                     $jc(
                         $jc(
                             $jc(
-                                $jc($jc($jc(0, id.hashCode), title.hashCode),
-                                    image.hashCode),
-                                location.hashCode),
-                            date.hashCode),
-                        price.hashCode),
-                    by.hashCode),
-                about.hashCode),
-            category.hashCode),
-        isFavorite.hashCode));
+                                $jc(
+                                    $jc(
+                                        $jc(
+                                            $jc(
+                                                $jc(
+                                                    $jc(
+                                                        $jc(
+                                                            $jc(
+                                                                $jc(0,
+                                                                    id.hashCode),
+                                                                title.hashCode),
+                                                            image.hashCode),
+                                                        location.hashCode),
+                                                    date.hashCode),
+                                                price.hashCode),
+                                            by.hashCode),
+                                        about.hashCode),
+                                    category.hashCode),
+                                isFavorite.hashCode),
+                            eventType.hashCode),
+                        startDate.hashCode),
+                    startTime.hashCode),
+                endDate.hashCode),
+            endTime.hashCode),
+        entryFees.hashCode));
   }
 
   @override
@@ -235,7 +336,13 @@ class _$Event extends Event {
           ..add('by', by)
           ..add('about', about)
           ..add('category', category)
-          ..add('isFavorite', isFavorite))
+          ..add('isFavorite', isFavorite)
+          ..add('eventType', eventType)
+          ..add('startDate', startDate)
+          ..add('startTime', startTime)
+          ..add('endDate', endDate)
+          ..add('endTime', endTime)
+          ..add('entryFees', entryFees))
         .toString();
   }
 }
@@ -283,6 +390,31 @@ class EventBuilder implements Builder<Event, EventBuilder> {
   bool get isFavorite => _$this._isFavorite;
   set isFavorite(bool isFavorite) => _$this._isFavorite = isFavorite;
 
+  ListBuilder<String> _eventType;
+  ListBuilder<String> get eventType =>
+      _$this._eventType ??= new ListBuilder<String>();
+  set eventType(ListBuilder<String> eventType) => _$this._eventType = eventType;
+
+  String _startDate;
+  String get startDate => _$this._startDate;
+  set startDate(String startDate) => _$this._startDate = startDate;
+
+  String _startTime;
+  String get startTime => _$this._startTime;
+  set startTime(String startTime) => _$this._startTime = startTime;
+
+  String _endDate;
+  String get endDate => _$this._endDate;
+  set endDate(String endDate) => _$this._endDate = endDate;
+
+  String _endTime;
+  String get endTime => _$this._endTime;
+  set endTime(String endTime) => _$this._endTime = endTime;
+
+  String _entryFees;
+  String get entryFees => _$this._entryFees;
+  set entryFees(String entryFees) => _$this._entryFees = entryFees;
+
   EventBuilder();
 
   EventBuilder get _$this {
@@ -297,6 +429,12 @@ class EventBuilder implements Builder<Event, EventBuilder> {
       _about = _$v.about;
       _category = _$v.category;
       _isFavorite = _$v.isFavorite;
+      _eventType = _$v.eventType?.toBuilder();
+      _startDate = _$v.startDate;
+      _startTime = _$v.startTime;
+      _endDate = _$v.endDate;
+      _endTime = _$v.endTime;
+      _entryFees = _$v.entryFees;
       _$v = null;
     }
     return this;
@@ -317,18 +455,37 @@ class EventBuilder implements Builder<Event, EventBuilder> {
 
   @override
   _$Event build() {
-    final _$result = _$v ??
-        new _$Event._(
-            id: id,
-            title: title,
-            image: image,
-            location: location,
-            date: date,
-            price: price,
-            by: by,
-            about: about,
-            category: category,
-            isFavorite: isFavorite);
+    _$Event _$result;
+    try {
+      _$result = _$v ??
+          new _$Event._(
+              id: id,
+              title: title,
+              image: image,
+              location: location,
+              date: date,
+              price: price,
+              by: by,
+              about: about,
+              category: category,
+              isFavorite: isFavorite,
+              eventType: _eventType?.build(),
+              startDate: startDate,
+              startTime: startTime,
+              endDate: endDate,
+              endTime: endTime,
+              entryFees: entryFees);
+    } catch (_) {
+      String _$failedField;
+      try {
+        _$failedField = 'eventType';
+        _eventType?.build();
+      } catch (e) {
+        throw new BuiltValueNestedFieldError(
+            'Event', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

@@ -1,5 +1,6 @@
 import 'package:built_value/serializer.dart';
 import 'package:built_value/built_value.dart';
+import 'package:built_collection/built_collection.dart';
 
 part 'event.g.dart';
 
@@ -27,8 +28,22 @@ abstract class Event implements Built<Event, EventBuilder> {
   String get about;
   @nullable
   String get category;
-  Event._();
+  @nullable
   bool get isFavorite;
+  @nullable
+  BuiltList<String> get eventType;
+  @nullable
+  String get startDate;
+  @nullable
+  String get startTime;
+  @nullable
+  String get endDate;
+  @nullable
+  String get endTime;
+  @nullable
+  String get entryFees;
+
+  Event._();
   factory Event([updates(EventBuilder b)]) = _$Event;
 }
 /*class Event {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/blocs/create_event_bloc.dart';
 import 'package:flutter_events/blocs/home_bloc.dart';
 import 'package:flutter_events/blocs/interests_bloc.dart';
 import 'package:flutter_events/models/events/event.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_events/utils/custom_colors.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_events/ui/pages/interests.dart';
 import 'package:flutter_events/ui/pages/home.dart';
+import 'package:google_places_picker/google_places_picker.dart';
 
 void main() {
   /* debugPaintSizeEnabled=true;*/
@@ -32,7 +34,14 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
     ));*/
 
+    PluginGooglePlacePicker.initialize(
+      androidApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
+      iosApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
+    );
+
    var  bloc = BlocProvider.of<ApplicationBloc>(context);
+
+   //_initializePlacePicker();
 
     return MaterialApp(
         theme: ThemeData(
@@ -54,6 +63,7 @@ class MyApp extends StatelessWidget {
 
             }
 
+
             return null;
         },
         routes: {
@@ -69,7 +79,11 @@ class MyApp extends StatelessWidget {
             bloc: HomeBloc(bloc),
             child: HomePage(),
           ),
-          '/create_event': (context) => CreateEvent()
+
+          '/create_event': (context) => BlocProvider<CreateEventBloc>(
+            bloc: CreateEventBloc(bloc),
+            child: CreateEvent(),
+          )
         },
         home: _handleHomeScreen(context, bloc));
   }
@@ -107,4 +121,5 @@ class MyApp extends StatelessWidget {
       },
     );
   }
+
 }

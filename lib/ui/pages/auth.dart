@@ -258,7 +258,6 @@ class _AuthenticationState extends State<Authentication>
     final snackbar = SnackBar(content: Text(message));
 
     Scaffold.of(contextSnackbar).showSnackBar(snackbar);
-    print(message);
   }
 
   @override

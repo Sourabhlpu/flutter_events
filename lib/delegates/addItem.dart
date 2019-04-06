@@ -1,6 +1,7 @@
 enum SuccessType{
   successSign,
-  successSignup
+  successSignup,
+  uploadImage
 }
 abstract class AddItemDelegate {
   void onSuccess(SuccessType type);

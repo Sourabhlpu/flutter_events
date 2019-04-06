@@ -1,9 +1,9 @@
-/*import 'package:built_value/serializer.dart';
+import 'package:built_value/serializer.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_collection/built_collection.dart';
 
-part 'package:flutter_events/models/users/user_fs.g.dart';*/
-class UserFireStore
+part 'user_fs.g.dart';
+/*class UserFireStore
 {
   final String name;
   final String email;
@@ -29,9 +29,9 @@ class UserFireStore
         interests = json['interests'],
         favorites = json['favorites'];
 
-}
+}*/
 
-/*abstract class UserFireStore implements Built<UserFireStore, UserFireStoreBuilder> {
+abstract class UserFireStore implements Built<UserFireStore, UserFireStoreBuilder> {
 
   static Serializer<UserFireStore> get serializer => _$userFireStoreSerializer;
 
@@ -42,10 +42,10 @@ class UserFireStore
    @nullable
    String get phone;
    @nullable
-   BuiltList<dynamic> get interests;
+   BuiltList<String> get interests;
    @nullable
-   BuiltList<dynamic> get favorites;
+   BuiltList<String> get favorites;
 
   UserFireStore._();
   factory UserFireStore([updates(UserFireStoreBuilder b)]) = _$UserFireStore;
-}*/
+}

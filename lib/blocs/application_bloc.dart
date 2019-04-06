@@ -1,20 +1,27 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/delegates/addItem.dart';
+import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
+import 'package:flutter_events/utils/app_utils.dart';
 import 'package:rxdart/rxdart.dart';
 
 enum CurrentHome { noPage, introPage, interestsPage, authPage, homePage }
 
-enum AddSinkType { signIn, signUp, interestType, saveInterests }
+enum AddSinkType { signIn, signUp, interestType, saveInterests, uploadImage, createEvent }
 
 class ApplicationBloc implements BlocBase {
 
   static FirebaseUser user;
 
   static UserFireStore userFs;
+
+
 
 
 
@@ -37,11 +44,19 @@ class ApplicationBloc implements BlocBase {
   Stream<UserFireStore> get userFirestore => _userFirestoreController.stream;
   final _userFirestoreController = BehaviorSubject<UserFireStore>();
 
+  Stream<UnmodifiableListView<Interest>> get interests => _interestListController.stream;
+  final _interestListController = BehaviorSubject<UnmodifiableListView<Interest>>();
+
+  Sink<Event> get createEvent => _createEventController.sink;
+  final _createEventController = BehaviorSubject<Event>();
+
 
 
   ApplicationBloc() {
     _onFirebaseAuthenticationChanged();
     _onGetStartedClickedFromIntro();
+    _fetchInterests();
+
   }
 
   void _onGetStartedClickedFromIntro() {
@@ -111,10 +126,27 @@ class ApplicationBloc implements BlocBase {
     _shouldShowIntroSubject.close();
     _userFirestoreController.close();
     _userController.close();
+    _interestListController.close();
   }
 
   _getUserFromFirestore() async {
     userFs = await repository.getUserFromDb(user);
     _userFirestoreController.add(userFs);
   }
+
+  /*
+   * start fetching the list of interests from the firestore db
+   */
+  void _fetchInterests() async {
+
+    if (await AppUtils.checkNetworkAvailability()) {
+
+      UnmodifiableListView<Interest> _interestUnmut = await repository.fetchInterests();
+
+
+      _interestListController.sink.add(_interestUnmut);
+
+    }
+  }
+
 }

@@ -1,13 +1,14 @@
+import 'package:built_collection/src/list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/utils/transparent_route.dart';
 import '../widgets/add_splash.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
+import '../widgets/horizontal_list_with_title.dart';
+import 'package:flutter_events/models/interests/interest.dart';
 
 class ProfilePage extends StatefulWidget {
-  List<dynamic> _interests = [];
-
   List<String> _profileActions = [
     'My Events',
     'Organise event',
@@ -23,6 +24,14 @@ class ProfilePage extends StatefulWidget {
 
 class ProfilePageState extends State<ProfilePage> {
   ApplicationBloc _applicationBloc;
+
+  _getInterestsList(BuiltList<String> interests) {
+    return interests
+        .map((interest) => Interest((b) => b
+          ..interestName = interest
+          ..isSelected = false))
+        .toList();
+  }
 
   @override
   void initState() {
@@ -48,49 +57,21 @@ class ProfilePageState extends State<ProfilePage> {
         child: StreamBuilder(
             stream: _applicationBloc.userFirestore,
             builder: (context, AsyncSnapshot<UserFireStore> snapshot) {
-              if (snapshot.hasData) {
-                widget._interests = snapshot.data.interests;
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _buildUserImageTile(snapshot.data),
-                  _getHorizontalDivider(),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      'Your Interests',
-                      style: TextStyle(fontFamily: 'AvenirLight', fontSize: 12),
-                    ),
-                  ),
-                  _buildHorizontalInterestsList(),
-                  _buildProfileActionList()
-                ],
-              );
+              if (snapshot.hasData)
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _buildUserImageTile(snapshot.data),
+                    _getHorizontalDivider(),
+                    snapshot.hasData
+                        ? HorizontalListWithTitle('Interests',
+                            _getInterestsList(snapshot.data.interests), true)
+                        : Container(),
+                    _buildProfileActionList()
+                  ],
+                );
+              else return Container();
             }),
-      ),
-    );
-  }
-
-  _buildInterestButton(String interest) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: AddSplash(
-        onTap: () {},
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border.all(
-                  color: Colors.grey, width: 1, style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(15)),
-          child: Center(
-              child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              interest,
-              style: TextStyle(fontFamily: 'AvenirLight', fontSize: 14),
-            ),
-          )),
-        ),
       ),
     );
   }
@@ -159,42 +140,6 @@ class ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  _buildHorizontalInterestsList() {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0),
-      child: Container(
-        height: 30,
-        child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: widget._interests.length + 1,
-            itemBuilder: (BuildContext context, int index) {
-              return index == 0
-                  ? Container(
-                      height: 30,
-                      width: 30,
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                              colors: [
-                                const Color(0xFFDF69DD),
-                                const Color(0xFFED5D66)
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight)),
-                      child: Center(
-                          child: IconButton(
-                              icon: Icon(Icons.add),
-                              iconSize: 15,
-                              color: Colors.white,
-                              onPressed: () {})),
-                    )
-                  : _buildInterestButton(widget._interests[index - 1]);
-            }),
-      ),
-    );
-  }
-
   _buildProfileActionList() {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -205,7 +150,7 @@ class ProfilePageState extends State<ProfilePage> {
             if (index.isEven) {
               double realProfileActionListIndex = index / 2;
               return AddSplash(
-                onTap: (){
+                onTap: () {
                   _handleProfileActionTap(index, context);
                 },
                 child: Padding(

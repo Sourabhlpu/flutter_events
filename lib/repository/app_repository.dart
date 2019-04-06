@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:collection';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
@@ -48,7 +51,7 @@ class AppRepository {
 
   Future<void> addUserToRemoteDb(User user) => apiProvider.addUserToFirestore(user);
 
-  Future<List<Interest>> fetchInterests() => apiProvider.fetchInterests();
+  Future<UnmodifiableListView<Interest>> fetchInterests() => apiProvider.fetchInterests();
 
   Future<void> saveInterests(List<String> interests, FirebaseUser user) => apiProvider.saveInterests(interests, user);
 
@@ -60,6 +63,9 @@ class AppRepository {
 
   Future<UserFireStore> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromFirestore(user);
 
+  Stream<StorageTaskEvent> uploadFile(File file) => apiProvider.uploadImage(file);
+
+  Future<void> createEvent(Event event) => apiProvider.createEvent(event);
 
 }
 
