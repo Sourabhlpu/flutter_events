@@ -76,22 +76,20 @@ class ImageUploadFailed extends CreateEventStates{
   String toString() => "upload image failed";
 }
 
-class EventTypeSelected extends CreateEventStates{
+class EventTypeToggled extends CreateEventStates{
 
   final List<EventTypes> eventType;
 
-  EventTypeSelected({this.eventType});
+  EventTypeToggled({this.eventType});
 
   @override
   String toString() => "event type selected";
 }
 
-class EventTypeUnelected extends CreateEventStates{
 
-  final List<EventTypes> eventType;
 
-  EventTypeUnelected({this.eventType});
+class EventTypeTapped extends CreateEventStates{
 
   @override
-  String toString() => "event type selected";
+  String toString() => "Event type tapped";
 }

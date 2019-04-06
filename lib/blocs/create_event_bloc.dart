@@ -54,14 +54,12 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
     }
 
     if (event is EventTypePressed) {
-      bool isSelected = _eventTypes[event.index].isSelected;
       _toggleEventSelection(event);
 
-      if (isSelected) {
-        yield EventTypeUnelected(eventType: _eventTypes);
-      } else {
-        yield EventTypeSelected(eventType: _eventTypes);
-      }
+
+        yield EventTypeToggled(eventType: _eventTypes);
+        yield EventTypeTapped();
+
     }
   }
 

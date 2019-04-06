@@ -413,16 +413,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
         isListExpandable: false,
         onTap: _onEventTypeTapped,
       );
-    } else if (state is EventTypeSelected) {
-      _eventTypes = state.eventType;
-      return HorizontalListWithTitle(
-        title: 'Event Type',
-        list: state.eventType,
-        isListExpandable: false,
-        onTap: _onEventTypeTapped,
-      );
-    }
-    else if (state is EventTypeUnelected) {
+    } else if (state is EventTypeToggled) {
       _eventTypes = state.eventType;
       return HorizontalListWithTitle(
         title: 'Event Type',
