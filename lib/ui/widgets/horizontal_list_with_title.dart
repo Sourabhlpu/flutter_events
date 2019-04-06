@@ -8,13 +8,14 @@ import 'package:flutter_events/ui/widgets/add_splash.dart';
  */
 class HorizontalListWithTitle extends StatefulWidget {
   final String title;
-  final List<Interest> list;
-  final bool _isListExpandable;
+  final List<dynamic> list;
+  final bool isListExpandable;
+  final Function onTap;
 
   /*
    * @param title
    */
-  HorizontalListWithTitle(this.title, this.list, this._isListExpandable);
+  HorizontalListWithTitle({this.title, this.list, this.isListExpandable,this.onTap});
 
   @override
   State<StatefulWidget> createState() {
@@ -48,12 +49,12 @@ class HorizontalListWithTitleState extends State<HorizontalListWithTitle> {
         height: 30,
         child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: widget._isListExpandable
+            itemCount: widget.isListExpandable
                 ? widget.list.length + 1
                 : widget.list.length,
             itemBuilder: (BuildContext context, int index) {
-              int actualIndex = widget._isListExpandable ? index - 1 : index;
-              return (widget._isListExpandable && index == 0)
+              int actualIndex = widget.isListExpandable ? index - 1 : index;
+              return (widget.isListExpandable && index == 0)
                   ? _buildAddInterestButton(context)
                   : _buildHorizontalListItem(
                       widget.list[actualIndex].interestName, actualIndex);
@@ -87,14 +88,8 @@ class HorizontalListWithTitleState extends State<HorizontalListWithTitle> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
       child: AddSplash(
-        onTap: () {
-          setState(() {
-            var tappedInterest =
-                widget.list[index].rebuild((b) => b.isSelected = !b.isSelected);
-
-            widget.list.insert(index, tappedInterest);
-            widget.list.removeAt(index + 1);
-          });
+        onTap: (){
+          widget.onTap(index);
         },
         child: Container(
           decoration: isSelected

@@ -7,6 +7,7 @@ import 'package:flutter_events/blocs/home_bloc.dart';
 import 'package:flutter_events/blocs/interests_bloc.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/ui/pages/create_event.dart';
 import 'package:flutter_events/ui/pages/event_details.dart';
 import 'package:flutter_events/ui/pages/intro.dart';
@@ -27,12 +28,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+  AppRepository _repository = AppRepository();
 
   @override
   Widget build(BuildContext context) {
     /* SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
     ));*/
+
+
 
     PluginGooglePlacePicker.initialize(
       androidApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
@@ -80,10 +84,7 @@ class MyApp extends StatelessWidget {
             child: HomePage(),
           ),
 
-          '/create_event': (context) => BlocProvider<CreateEventBloc>(
-            bloc: CreateEventBloc(bloc),
-            child: CreateEvent(),
-          )
+          '/create_event': (context) => CreateEvent(appRepository: _repository)
         },
         home: _handleHomeScreen(context, bloc));
   }

@@ -64,8 +64,8 @@ class ProfilePageState extends State<ProfilePage> {
                     _buildUserImageTile(snapshot.data),
                     _getHorizontalDivider(),
                     snapshot.hasData
-                        ? HorizontalListWithTitle('Interests',
-                            _getInterestsList(snapshot.data.interests), true)
+                        ? HorizontalListWithTitle(title:'Interests',
+                            list:_getInterestsList(snapshot.data.interests), isListExpandable: true)
                         : Container(),
                     _buildProfileActionList()
                   ],
