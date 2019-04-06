@@ -34,7 +34,7 @@ class InterestsBloc implements BlocBase {
 
   //the stream for showing the loader
   Stream<bool> get isLoading => _isLoadingSubject.stream;
-  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
+  final _isLoadingSubject = BehaviorSubject<bool>.seeded((false));
 
   InterestsBloc() {
     _initializeFbUser();

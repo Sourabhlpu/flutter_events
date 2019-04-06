@@ -21,7 +21,7 @@ class AuthBloc implements BlocBase {
 
   // the stream to manage the showing of loader when the we are hitting the api.
   Stream<bool> get isLoading => _isLoadingSubject.stream;
-  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
+  final _isLoadingSubject = BehaviorSubject<bool>.seeded((false));
 
   /*
    * an interface that allows callback to the widget that is adding sinks to sign in and signiup

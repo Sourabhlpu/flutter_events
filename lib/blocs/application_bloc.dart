@@ -31,7 +31,7 @@ class ApplicationBloc implements BlocBase {
 
   Stream<CurrentHome> get currentHome => _currentHomeController.stream;
   final _currentHomeController =
-      BehaviorSubject<CurrentHome>(seedValue: CurrentHome.noPage);
+      BehaviorSubject<CurrentHome>.seeded((CurrentHome.noPage));
 
   // This is the input sink to set the status of should show intro screen. This sets the preference value when the get started
   // button is clicked in the intro screens.

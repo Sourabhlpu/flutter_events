@@ -33,7 +33,7 @@ class HomeBloc implements BlocBase {
 
   //for showing the loading state
   Stream<bool> get isLoading => _isLoadingSubject.stream;
-  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: true);
+  final _isLoadingSubject = BehaviorSubject<bool>.seeded((true));
 
   @override
   void dispose() {

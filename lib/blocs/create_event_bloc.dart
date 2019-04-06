@@ -18,7 +18,7 @@ class CreateEventBloc implements BlocBase {
 
   // the stream to manage the showing of loader when the we are hitting the api.
   Stream<bool> get isLoading => _isLoadingSubject.stream;
-  final _isLoadingSubject = BehaviorSubject<bool>(seedValue: false);
+  final _isLoadingSubject = BehaviorSubject<bool>(sync: false);
 
   Stream<StorageTaskEvent> get storageTaskEvent =>
       _imageUploadController.stream;
