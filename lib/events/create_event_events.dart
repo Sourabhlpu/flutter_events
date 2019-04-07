@@ -53,3 +53,27 @@ class LocationTapped extends CreateEventEvents{
   @override
   String toString() => "location tapped";
 }
+
+class ImageUploadedEvent extends CreateEventEvents{
+
+  final String url;
+
+  ImageUploadedEvent({@required this.url});
+
+  @override
+  String toString() => "image uploaded";
+
+
+}
+
+class UploadingImageEvent extends CreateEventEvents{
+
+  final double percent;
+
+  UploadingImageEvent({@required this.percent});
+
+  @override
+  String toString() => "uploading image percent: $percent";
+
+
+}

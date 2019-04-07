@@ -45,7 +45,7 @@ class ListFetched extends CreateEventStates{
 
   final List<EventTypes> eventType;
 
-  ListFetched({@required this.eventType});
+  ListFetched({@required this.eventType}):super([eventType]);
 
   @override
   String toString() => "List fetched {$eventType}";
@@ -54,8 +54,9 @@ class ListFetched extends CreateEventStates{
 }
 
 class UploadingImage extends CreateEventStates{
+  final double percent;
 
-
+  UploadingImage({@required this.percent}):super([percent]);
   @override
   String toString() => "uploading image";
 }
@@ -64,7 +65,7 @@ class ImageUploaded extends CreateEventStates{
 
   final String fileName;
 
-  ImageUploaded({@required this.fileName});
+  ImageUploaded({@required this.fileName}):super([fileName]);
   @override
   String toString() => "image uploaded";
 }
@@ -80,7 +81,7 @@ class EventTypeToggled extends CreateEventStates{
 
   final List<EventTypes> eventType;
 
-  EventTypeToggled({this.eventType});
+  EventTypeToggled({this.eventType}):super([eventType]);
 
   @override
   String toString() => "event type selected";
@@ -98,7 +99,7 @@ class LocationSelected extends CreateEventStates{
 
   final String location;
 
-  LocationSelected({@required this.location});
+  LocationSelected({@required this.location}):super([location]);
 
   @override
   String toString() => "event location: $location";

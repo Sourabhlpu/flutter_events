@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_events/blocs/create_event_bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/models/events/event.dart';
-import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/horizontal_list_with_title.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_places_picker/google_places_picker.dart';
 import '../widgets/primary_btn.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter_events/blocs/bloc.dart';
@@ -138,6 +136,14 @@ class _CreateEventFormState extends State<CreateEventForm> {
                     children: <Widget>[
                       _setUploadImageText(state),
                       _createUploadImageButton(state)
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: <Widget>[
+                      _createLinearProgressIndicator(state),
                     ],
                   ),
                 ),
@@ -391,7 +397,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   _createUploadImageButton(CreateEventStates state) {
     if (state is UploadingImage) {
-      return CircularProgressIndicator();
+      return Text(
+        '${state.percent}%'
+      );
     } else if(state is CreateEventInitial || state is ImageUploaded || state is ListFetched) {
       return IconButton(
         icon: Icon(Icons.add),
@@ -402,6 +410,20 @@ class _CreateEventFormState extends State<CreateEventForm> {
     }
     else return Container();
   }
+
+  _createLinearProgressIndicator(CreateEventStates state)
+  {
+    if(state is UploadingImage)
+      {
+        return LinearProgressIndicator(
+          backgroundColor: Colors.grey,
+          value: state.percent,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+        );
+      }
+      else return Container();
+  }
+
 
   _setEventTypeList(CreateEventStates state) {
     if (state is CreateEventInitial) {
