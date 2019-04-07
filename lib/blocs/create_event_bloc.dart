@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
+import 'package:built_collection/built_collection.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/repository/app_repository.dart';
+import 'package:google_places_picker/google_places_picker.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';
 
@@ -55,11 +57,19 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
     if (event is EventTypePressed) {
       _toggleEventSelection(event);
+      yield EventTypeToggled(eventType: List.from(_eventTypes));
+      yield EventTypeTapped();
+    }
 
+    if (event is LocationTapped) {
+      try {
+        Place p = await PluginGooglePlacePicker.showAutocomplete(
+            mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
 
-        yield EventTypeToggled(eventType: _eventTypes);
-        yield EventTypeTapped();
-
+        yield LocationSelected(location: p.name);
+      } catch (error) {
+        print(error);
+      }
     }
   }
 
@@ -78,8 +88,6 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   }
 
   _toggleEventSelection(EventTypePressed event) {
-    //List<EventTypes> eventTypes = List.from(_eventTypes);
-
     String eventTypeName = _eventTypes[event.index].interestName;
     bool isSelected = _eventTypes[event.index].isSelected;
     EventTypes eventType =
@@ -91,5 +99,14 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   _updateEventTypeList(int index, EventTypes eventType) {
     _eventTypes.insert(index, eventType);
     _eventTypes.removeAt(index + 1);
+  }
+
+  _openLocationPicker() async {
+    try {
+      Place p = await PluginGooglePlacePicker.showAutocomplete(
+          mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
+    } catch (error) {
+      print(error);
+    }
   }
 }

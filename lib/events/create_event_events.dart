@@ -46,3 +46,10 @@ class EventTypePressed extends CreateEventEvents{
   String toString() => "event type tapped";
 
 }
+
+class LocationTapped extends CreateEventEvents{
+
+
+  @override
+  String toString() => "location tapped";
+}

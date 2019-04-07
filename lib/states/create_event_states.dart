@@ -93,3 +93,15 @@ class EventTypeTapped extends CreateEventStates{
   @override
   String toString() => "Event type tapped";
 }
+
+class LocationSelected extends CreateEventStates{
+
+  final String location;
+
+  LocationSelected({@required this.location});
+
+  @override
+  String toString() => "event location: $location";
+
+
+}

@@ -80,7 +80,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
                 _setEventTypeList(state),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildLocationField(),
+                  child: _buildLocationField(state),
                 ),
                 Table(
                   children: [
@@ -180,10 +180,18 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _buildLocationField() {
+  _buildLocationField(CreateEventStates state) {
+
+    if(state is LocationSelected)
+      {
+        _locationFieldController.text = state.location;
+
+      }
     return AddSplash(
-      onTap: () async {
-        try {
+      onTap: ()  {
+
+        _createEventBloc.dispatch(LocationTapped());
+       /* try {
           Place p = await PluginGooglePlacePicker.showAutocomplete(
               mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
           setState(() {
@@ -191,7 +199,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
           });
         } catch (error) {
           print(error);
-        }
+        }*/
       },
       child: TextFormField(
         enabled: false,
