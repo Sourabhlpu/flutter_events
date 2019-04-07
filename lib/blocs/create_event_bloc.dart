@@ -49,7 +49,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
       try {
         File image = await ImagePicker.pickImage(source: ImageSource.gallery);
-        //yield UploadingImage();
+        yield UploadingImage(percent: 0.0);
         Stream<StorageTaskEvent> taskEvent = repository.uploadFile(image);
         _listenToUploadEvents(taskEvent);
       } catch (error) {

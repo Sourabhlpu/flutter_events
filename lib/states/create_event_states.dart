@@ -5,104 +5,104 @@ import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/models/interests/interest.dart';
 import 'package:meta/meta.dart';
 
-abstract class CreateEventStates extends Equatable{
+  abstract class CreateEventStates extends Equatable{
 
-  CreateEventStates([List props = const[]]) : super(props);
-}
+    CreateEventStates([List props = const[]]) : super(props);
+  }
 
-class CreateEventInitial extends CreateEventStates{
+  class CreateEventInitial extends CreateEventStates{
 
-  @override
-  String toString() => "createEventInitial";
-}
+    @override
+    String toString() => "createEventInitial";
+  }
 
-class CreateEventLoading extends CreateEventStates{
-
-
-  @override
-  String toString() => "loading";
-}
-
-class CreateEventSuccess extends CreateEventStates{
+  class CreateEventLoading extends CreateEventStates{
 
 
-  @override
-  String toString() => "createEventSuccess";
-}
+    @override
+    String toString() => "loading";
+  }
 
-class CreateEventFailure extends CreateEventStates{
-
-  final String error;
-
-  CreateEventFailure({@required this.error}) : super([error]);
+  class CreateEventSuccess extends CreateEventStates{
 
 
-  @override
-  String toString() => "CreateEventFailure {error : $error}";
-}
+    @override
+    String toString() => "createEventSuccess";
+  }
 
-class ListFetched extends CreateEventStates{
+  class CreateEventFailure extends CreateEventStates{
 
-  final List<EventTypes> eventType;
+    final String error;
 
-  ListFetched({@required this.eventType}):super([eventType]);
-
-  @override
-  String toString() => "List fetched {$eventType}";
+    CreateEventFailure({@required this.error}) : super([error]);
 
 
-}
+    @override
+    String toString() => "CreateEventFailure {error : $error}";
+  }
 
-class UploadingImage extends CreateEventStates{
-  final double percent;
+  class ListFetched extends CreateEventStates{
 
-  UploadingImage({@required this.percent}):super([percent]);
-  @override
-  String toString() => "uploading image";
-}
+    final List<EventTypes> eventType;
 
-class ImageUploaded extends CreateEventStates{
+    ListFetched({@required this.eventType}):super([eventType]);
 
-  final String fileName;
-
-  ImageUploaded({@required this.fileName}):super([fileName]);
-  @override
-  String toString() => "image uploaded";
-}
-
-class ImageUploadFailed extends CreateEventStates{
+    @override
+    String toString() => "List fetched {$eventType}";
 
 
-  @override
-  String toString() => "upload image failed";
-}
+  }
 
-class EventTypeToggled extends CreateEventStates{
+  class UploadingImage extends CreateEventStates{
+    final double percent;
 
-  final List<EventTypes> eventType;
+    UploadingImage({@required this.percent}):super([percent]);
+    @override
+    String toString() => "uploading image";
+  }
 
-  EventTypeToggled({this.eventType}):super([eventType]);
+  class ImageUploaded extends CreateEventStates{
 
-  @override
-  String toString() => "event type selected";
-}
+    final String fileName;
 
+    ImageUploaded({@required this.fileName}):super([fileName]);
+    @override
+    String toString() => "image uploaded";
+  }
 
-
-class EventTypeTapped extends CreateEventStates{
-
-  @override
-  String toString() => "Event type tapped";
-}
-
-class LocationSelected extends CreateEventStates{
-
-  final String location;
-
-  LocationSelected({@required this.location}):super([location]);
-
-  @override
-  String toString() => "event location: $location";
+  class ImageUploadFailed extends CreateEventStates{
 
 
-}
+    @override
+    String toString() => "upload image failed";
+  }
+
+  class EventTypeToggled extends CreateEventStates{
+
+    final List<EventTypes> eventType;
+
+    EventTypeToggled({this.eventType}):super([eventType]);
+
+    @override
+    String toString() => "event type selected";
+  }
+
+
+
+  class EventTypeTapped extends CreateEventStates{
+
+    @override
+    String toString() => "Event type tapped";
+  }
+
+  class LocationSelected extends CreateEventStates{
+
+    final String location;
+
+    LocationSelected({@required this.location}):super([location]);
+
+    @override
+    String toString() => "event location: $location";
+
+
+  }

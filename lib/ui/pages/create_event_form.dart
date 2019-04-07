@@ -139,14 +139,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
                     ],
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: <Widget>[
-                      _createLinearProgressIndicator(state),
-                    ],
-                  ),
-                ),
+
                 PrimaryGradientButton('Create Event', _createEvent, false)
               ],
             ),
@@ -397,10 +390,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   _createUploadImageButton(CreateEventStates state) {
     if (state is UploadingImage) {
-      return Text(
-        '${state.percent}%'
-      );
-    } else if(state is CreateEventInitial || state is ImageUploaded || state is ListFetched) {
+     return Container(
+       width: 20,
+       height: 20,
+       child: CircularProgressIndicator(
+         value: state.percent,
+         backgroundColor: Colors.grey,
+       ),
+     );
+    } else  {
       return IconButton(
         icon: Icon(Icons.add),
         onPressed: () {
@@ -408,7 +406,6 @@ class _CreateEventFormState extends State<CreateEventForm> {
         },
       );
     }
-    else return Container();
   }
 
   _createLinearProgressIndicator(CreateEventStates state)
