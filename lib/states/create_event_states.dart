@@ -62,9 +62,9 @@ class UploadingImage extends CreateEventStates{
 
 class ImageUploaded extends CreateEventStates{
 
-  final File file;
+  final String fileName;
 
-  ImageUploaded({@required this.file});
+  ImageUploaded({@required this.fileName});
   @override
   String toString() => "image uploaded";
 }

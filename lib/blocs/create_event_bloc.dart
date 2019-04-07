@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
-import 'package:built_collection/built_collection.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
@@ -7,6 +10,7 @@ import 'package:flutter_events/repository/app_repository.dart';
 import 'package:google_places_picker/google_places_picker.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';
+import 'package:path/path.dart' as p;
 
 class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   final ApplicationBloc applicationBloc;
@@ -29,6 +33,8 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
       //todo return a list of event types as streams
 
       yield ListFetched(eventType: _getEventTypeList());
+
+
     }
     if (event is CreateEventPressed) {
       //todo hit backend to create event
@@ -41,15 +47,24 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
         yield CreateEventFailure(error: error.toString());
       }
     }
-    if (event is UploadImage) {
+    if (event is AddCoverImageTapped) {
       //todo upload image to the firestore server
-      yield UploadingImage();
+
 
       try {
-        //repository.uploadFile(event);
-        //repository.uploadFile(event.file);
+        File image = await ImagePicker.pickImage(source: ImageSource.gallery);
+        yield UploadingImage();
+        repository.uploadFile(image).listen((event) async*{
 
-        //yield ImageUploaded(file: event.file);
+          print(event);
+          if(event == StorageTaskEventType.success)
+            {
+              yield ImageUploaded(fileName: p.basename(image.path));
+            }
+
+
+        });
+
       } catch (error) {
         yield CreateEventFailure(error: error.toString());
       }
@@ -68,7 +83,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
         yield LocationSelected(location: p.name);
       } catch (error) {
-        print(error);
+        yield CreateEventFailure(error: error.toString());
       }
     }
   }

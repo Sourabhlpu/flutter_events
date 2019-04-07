@@ -17,9 +17,9 @@ class FetchEventType extends CreateEventEvents{
   String toString() => "fetchEvents";
 }
 
-class UploadImage extends CreateEventEvents {
+class AddCoverImageTapped extends CreateEventEvents {
 
-  UploadImage();
+  AddCoverImageTapped();
 
   @override
   String toString() => "uploadImage";

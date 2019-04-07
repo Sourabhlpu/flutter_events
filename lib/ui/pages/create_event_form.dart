@@ -18,8 +18,9 @@ import 'package:path/path.dart' as p;
 class CreateEventForm extends StatefulWidget {
   final CreateEventBloc createEventBoc;
 
-  CreateEventForm({@required this.createEventBoc});
-
+  CreateEventForm({@required this.createEventBoc}){
+    createEventBoc.dispatch(FetchEventType());
+  }
   @override
   _CreateEventFormState createState() => _CreateEventFormState();
 }
@@ -50,7 +51,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   @override
   void initState() {
-    _createEventBloc.dispatch(FetchEventType());
+
   }
 
   @override
@@ -191,15 +192,6 @@ class _CreateEventFormState extends State<CreateEventForm> {
       onTap: ()  {
 
         _createEventBloc.dispatch(LocationTapped());
-       /* try {
-          Place p = await PluginGooglePlacePicker.showAutocomplete(
-              mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
-          setState(() {
-            _locationFieldController.text = p.name;
-          });
-        } catch (error) {
-          print(error);
-        }*/
       },
       child: TextFormField(
         enabled: false,
@@ -400,14 +392,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
   _createUploadImageButton(CreateEventStates state) {
     if (state is UploadingImage) {
       return CircularProgressIndicator();
-    } else {
+    } else if(state is CreateEventInitial || state is ImageUploaded || state is ListFetched) {
       return IconButton(
         icon: Icon(Icons.add),
         onPressed: () {
-          _createEventBloc.dispatch(UploadImage());
+          _createEventBloc.dispatch(AddCoverImageTapped());
         },
       );
     }
+    else return Container();
   }
 
   _setEventTypeList(CreateEventStates state) {
@@ -444,7 +437,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
     String _text;
 
     if (state is ImageUploaded) {
-      _text = p.basename(state.file.path);
+      _text = p.basename(state.fileName);
     } else {
       _text = "Add Cover Image";
     }
