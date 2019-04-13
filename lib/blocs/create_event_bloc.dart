@@ -49,7 +49,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
       try {
         File image = await ImagePicker.pickImage(source: ImageSource.gallery);
-        yield UploadingImage(percent: 0.0);
+        yield (UploadingImage());
         Stream<StorageTaskEvent> taskEvent = repository.uploadFile(image);
         _listenToUploadEvents(taskEvent);
       } catch (error) {
@@ -127,12 +127,14 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
         dispatch(ImageUploadedEvent(url: imageUrl));
       }
 
-      if (event.type == StorageTaskEventType.progress) {
+      /*  if (event.type == StorageTaskEventType.progress) {
         double percent =
             (event.snapshot.bytesTransferred / event.snapshot.totalByteCount) * 100 ;
 
+        print(percent);
+
         dispatch(UploadingImageEvent(percent: percent));
-      }
+      }*/
     });
   }
 }

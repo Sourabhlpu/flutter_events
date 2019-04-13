@@ -16,7 +16,7 @@ import 'package:path/path.dart' as p;
 class CreateEventForm extends StatefulWidget {
   final CreateEventBloc createEventBoc;
 
-  CreateEventForm({@required this.createEventBoc}){
+  CreateEventForm({@required this.createEventBoc}) {
     createEventBoc.dispatch(FetchEventType());
   }
   @override
@@ -48,9 +48,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
   bool _showEntryFeesField = false;
 
   @override
-  void initState() {
-
-  }
+  void initState() {}
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +137,6 @@ class _CreateEventFormState extends State<CreateEventForm> {
                     ],
                   ),
                 ),
-
                 PrimaryGradientButton('Create Event', _createEvent, false)
               ],
             ),
@@ -181,15 +178,11 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _buildLocationField(CreateEventStates state) {
-
-    if(state is LocationSelected)
-      {
-        _locationFieldController.text = state.location;
-
-      }
+    if (state is LocationSelected) {
+      _locationFieldController.text = state.location;
+    }
     return AddSplash(
-      onTap: ()  {
-
+      onTap: () {
         _createEventBloc.dispatch(LocationTapped());
       },
       child: TextFormField(
@@ -390,15 +383,18 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   _createUploadImageButton(CreateEventStates state) {
     if (state is UploadingImage) {
-     return Container(
-       width: 20,
-       height: 20,
-       child: CircularProgressIndicator(
-         value: state.percent,
-         backgroundColor: Colors.grey,
-       ),
-     );
-    } else  {
+      print("presentation layer percent ${state.percent}");
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Container(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            backgroundColor: Colors.white,
+          ),
+        ),
+      );
+    } else {
       return IconButton(
         icon: Icon(Icons.add),
         onPressed: () {
@@ -408,19 +404,16 @@ class _CreateEventFormState extends State<CreateEventForm> {
     }
   }
 
-  _createLinearProgressIndicator(CreateEventStates state)
-  {
-    if(state is UploadingImage)
-      {
-        return LinearProgressIndicator(
-          backgroundColor: Colors.grey,
-          value: state.percent,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
-        );
-      }
-      else return Container();
+  _createLinearProgressIndicator(CreateEventStates state) {
+    if (state is UploadingImage) {
+      return LinearProgressIndicator(
+        backgroundColor: Colors.grey,
+        value: state.percent,
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
+      );
+    } else
+      return Container();
   }
-
 
   _setEventTypeList(CreateEventStates state) {
     if (state is CreateEventInitial) {
@@ -441,8 +434,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
         isListExpandable: false,
         onTap: _onEventTypeTapped,
       );
-    }
-    else if (_eventTypes != null && _eventTypes.isNotEmpty) {
+    } else if (_eventTypes != null && _eventTypes.isNotEmpty) {
       return HorizontalListWithTitle(
         title: 'EventType',
         list: _eventTypes,
@@ -457,6 +449,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
     if (state is ImageUploaded) {
       _text = p.basename(state.fileName);
+    } else if (state is UploadingImage) {
+      _text = "Uploading...";
     } else {
       _text = "Add Cover Image";
     }
@@ -468,7 +462,6 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _onEventTypeTapped(int index) {
-
     _createEventBloc.dispatch(EventTypePressed(index: index));
   }
 }

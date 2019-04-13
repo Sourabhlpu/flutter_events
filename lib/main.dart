@@ -36,16 +36,14 @@ class MyApp extends StatelessWidget {
       statusBarColor: Colors.white, //or set color with: Color(0xFF0000FF)
     ));*/
 
-
-
     PluginGooglePlacePicker.initialize(
       androidApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
       iosApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
     );
 
-   var  bloc = BlocProvider.of<ApplicationBloc>(context);
+    var bloc = BlocProvider.of<ApplicationBloc>(context);
 
-   //_initializePlacePicker();
+    //_initializePlacePicker();
 
     return MaterialApp(
         theme: ThemeData(
@@ -53,37 +51,29 @@ class MyApp extends StatelessWidget {
         ),
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
-        onGenerateRoute: (settings)
-        {
+        onGenerateRoute: (settings) {
           String routeName = settings.name;
 
-          if(routeName == '/event_details')
-            {
-              if(settings.arguments is Event)
-                {
-                  Event event = settings.arguments as Event;
-                  return MaterialPageRoute(builder: (BuildContext context) => EventDetail(event));
-                }
-
+          if (routeName == '/event_details') {
+            if (settings.arguments is Event) {
+              Event event = settings.arguments as Event;
+              return MaterialPageRoute(
+                  builder: (BuildContext context) => EventDetail(event));
             }
+          }
 
-
-            return null;
+          return null;
         },
         routes: {
-          '/auth': (context) => BlocProvider<AuthBloc>(
-                bloc: AuthBloc(),
-                child: Authentication(),
-              ),
+          '/auth': (context) => Authentication(repository: repository),
           '/interests': (context) => BlocProvider<InterestsBloc>(
                 bloc: InterestsBloc(),
                 child: Interests(),
               ),
           '/home': (context) => BlocProvider<HomeBloc>(
-            bloc: HomeBloc(bloc),
-            child: HomePage(),
-          ),
-
+                bloc: HomeBloc(bloc),
+                child: HomePage(),
+              ),
           '/create_event': (context) => CreateEvent(appRepository: _repository)
         },
         home: _handleHomeScreen(context, bloc));
@@ -98,29 +88,22 @@ class MyApp extends StatelessWidget {
           if (snapshot.data == CurrentHome.introPage) {
             return IntroPage();
           } else if (snapshot.data == CurrentHome.authPage) {
-            return BlocProvider<AuthBloc>(
-              bloc: AuthBloc(),
-              child: Authentication(),
-            );
+            return Authentication(repository: repository);
           } else if (snapshot.data == CurrentHome.interestsPage) {
             return BlocProvider<InterestsBloc>(
               bloc: InterestsBloc(),
               child: Interests(),
             );
-          }
-          else if(snapshot.data == CurrentHome.homePage)
-            {
-              return BlocProvider<HomeBloc>(
-                bloc: HomeBloc(bloc),
-                child: HomePage(),
-              );
-            }
-          else if (snapshot.data == CurrentHome.noPage) {
+          } else if (snapshot.data == CurrentHome.homePage) {
+            return BlocProvider<HomeBloc>(
+              bloc: HomeBloc(bloc),
+              child: HomePage(),
+            );
+          } else if (snapshot.data == CurrentHome.noPage) {
             return Container();
           }
         }
       },
     );
   }
-
 }

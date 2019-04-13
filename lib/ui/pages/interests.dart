@@ -47,7 +47,7 @@ class _InterestsState extends State<Interests> implements AddItemDelegate {
         backgroundColor: Colors.white,
       ),
       body: LoadingInfo(
-        isLoading: _bloc.isLoading,
+        isLoading: false,
         child: Stack(
           children: <Widget>[
             StreamBuilder(

@@ -5,7 +5,7 @@ class EventTypes extends Equatable {
   final String interestName;
   final bool isSelected;
 
-  EventTypes({@required this.interestName, @required this.isSelected});
+  EventTypes({@required this.interestName, @required this.isSelected}) : super([interestName, isSelected]);
 
   EventTypes copyWith({String eventType, bool isSelected}) {
     return EventTypes(

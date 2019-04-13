@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';

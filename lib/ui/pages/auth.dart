@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
+import 'package:flutter_events/events/auth_events.dart';
+import 'package:flutter_events/repository/app_repository.dart';
+import 'package:flutter_events/states/auth_states.dart';
 
 import '../widgets/primary_btn.dart';
 import '../widgets/primary_btn_white.dart';
@@ -11,14 +15,17 @@ import 'package:flutter_events/models/users/user.dart';
 import '../widgets/loading_info.dart';
 
 class Authentication extends StatefulWidget {
+  final AppRepository repository;
+
+  Authentication({@required this.repository});
+
   @override
   _AuthenticationState createState() {
     return _AuthenticationState();
   }
 }
 
-class _AuthenticationState extends State<Authentication>
-    implements AddItemDelegate {
+class _AuthenticationState extends State<Authentication> {
   final _signInformKey = GlobalKey<FormState>();
   final _signupformKey = GlobalKey<FormState>();
   String _userName;
@@ -35,8 +42,9 @@ class _AuthenticationState extends State<Authentication>
     // TODO: implement initState
     super.initState();
 
-    _bloc = BlocProvider.of<AuthBloc>(context);
+    _bloc = AuthBloc(repository: widget.repository);
   }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -49,34 +57,60 @@ class _AuthenticationState extends State<Authentication>
               child: SingleChildScrollView(
                 child: Container(
                   height: MediaQuery.of(context).size.height,
-                  child: LoadingInfo(
-                    isLoading: _bloc.isLoading,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        TabBar(
-                          tabs: [
-                            Tab(text: 'Sign In'),
-                            Tab(text: 'Sign Up'),
-                          ],
-                          labelColor: Theme.of(context).primaryColor,
-                          unselectedLabelColor: Colors.grey,
-                          indicatorPadding:
-                              const EdgeInsets.symmetric(horizontal: 16.0),
-                          labelPadding:
-                              const EdgeInsets.symmetric(vertical: 4.0),
-                        ),
-                        Flexible(
-                          flex: 1,
-                          fit: FlexFit.loose,
-                          child: TabBarView(children: [
-                            _buildSignInForm(),
-                            _buildSignupForm()
-                          ]),
-                        )
-                      ],
-                    ),
-                  ),
+                  child: BlocBuilder<AuthenticationEvents,
+                          AuthenticationStates>(
+                      bloc: _bloc,
+                      builder:
+                          (BuildContext context, AuthenticationStates state) {
+                        if (state is AuthError) {
+                          _onWidgetDidBuild(() {
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${state.error}'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          });
+                        }
+
+                        if (state is SignupSuccess) {
+                          Navigator.pushReplacementNamed(
+                              contextSnackbar, '/home');
+                        }
+
+                        if (state is SigninSuccess) {
+                          Navigator.pushReplacementNamed(
+                              contextSnackbar, '/interests');
+                        }
+                        return LoadingInfo(
+                          isLoading: state is Loading,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TabBar(
+                                tabs: [
+                                  Tab(text: 'Sign In'),
+                                  Tab(text: 'Sign Up'),
+                                ],
+                                labelColor: Theme.of(context).primaryColor,
+                                unselectedLabelColor: Colors.grey,
+                                indicatorPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                labelPadding:
+                                    const EdgeInsets.symmetric(vertical: 4.0),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                fit: FlexFit.loose,
+                                child: TabBarView(children: [
+                                  _buildSignInForm(),
+                                  _buildSignupForm()
+                                ]),
+                              )
+                            ],
+                          ),
+                        );
+                      }),
                 ),
               ),
             ),
@@ -235,7 +269,7 @@ class _AuthenticationState extends State<Authentication>
           phoneNumber: _phone,
           password: _password);
 
-      _bloc.addItem(_user, this, AddSinkType.signIn);
+      _bloc.dispatch(LoginButtonPressed(user: _user));
     }
   }
 
@@ -248,25 +282,13 @@ class _AuthenticationState extends State<Authentication>
           phoneNumber: _phone,
           password: _password);
 
-      _bloc.addItem(_user, this, AddSinkType.signUp);
+      _bloc.dispatch(SignupPressed(user: _user));
     }
   }
 
-  @override
-  void onError(String message) {
-    // TODO: implement onError
-    final snackbar = SnackBar(content: Text(message));
-
-    Scaffold.of(contextSnackbar).showSnackBar(snackbar);
-  }
-
-  @override
-  void onSuccess(SuccessType type) {
-    // TODO: implement onSuccess
-    if (type == SuccessType.successSignup) {
-      Navigator.pushReplacementNamed(contextSnackbar, '/interests');
-    } else if (type == SuccessType.successSign) {
-      Navigator.pushReplacementNamed(contextSnackbar, '/home');
-    }
+  void _onWidgetDidBuild(Function callback) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callback();
+    });
   }
 }

@@ -40,7 +40,7 @@ class EventTypePressed extends CreateEventEvents{
 
   final int index;
 
-  EventTypePressed({@required this.index});
+  EventTypePressed({@required this.index}) : super([index]);
 
   @override
   String toString() => "event type tapped";
@@ -58,7 +58,7 @@ class ImageUploadedEvent extends CreateEventEvents{
 
   final String url;
 
-  ImageUploadedEvent({@required this.url});
+  ImageUploadedEvent({@required this.url}) : super([url]);
 
   @override
   String toString() => "image uploaded";
@@ -70,7 +70,7 @@ class UploadingImageEvent extends CreateEventEvents{
 
   final double percent;
 
-  UploadingImageEvent({@required this.percent});
+  UploadingImageEvent({@required this.percent}) : super([percent]);
 
   @override
   String toString() => "uploading image percent: $percent";

@@ -148,7 +148,7 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
           ),
         ),
         body: LoadingInfo(
-          isLoading: _bloc.isLoading,
+          isLoading: false,
           child: TabBarView(children: [
             Tab(
               child: StreamBuilder(

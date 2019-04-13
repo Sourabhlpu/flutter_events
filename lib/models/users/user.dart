@@ -1,4 +1,6 @@
-class User
+import 'package:equatable/equatable.dart';
+
+class User extends Equatable
 {
   final String name;
   final String email;
@@ -6,6 +8,6 @@ class User
   final String password;
 
 
-  User({this.name, this.email, this.phoneNumber, this.password});
+  User({this.name, this.email, this.phoneNumber, this.password}) : super([name, email, phoneNumber, password]);
 
 }
