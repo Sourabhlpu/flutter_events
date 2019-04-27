@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/events/application_events.dart';
 import 'package:flutter_events/ui/widgets/primary_btn.dart';
 import 'package:flutter_events/ui/widgets/intro_screen.dart';
 import 'package:flutter_events/ui/widgets/intro_page_indicators.dart';
@@ -21,7 +22,7 @@ class IntroPageState extends State<IntroPage> {
 
   void _openAuthScreen()
   {
-    BlocProvider.of<ApplicationBloc>(context).shouldShowIntro.add(false);
+    BlocProvider.of<ApplicationBloc>(context).dispatch(IntroScreenButtonTapped());
 
     Navigator.pushReplacementNamed(context, '/auth');
 

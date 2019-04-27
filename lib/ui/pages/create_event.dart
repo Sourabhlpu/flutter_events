@@ -1,7 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/blocs/create_event_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/repository/app_repository.dart';

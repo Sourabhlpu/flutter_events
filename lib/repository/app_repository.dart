@@ -9,21 +9,24 @@ import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/api_provider.dart';
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_events/models/events/event.dart';
 
-
 class AppRepository {
-  static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  static final Firestore firestore = Firestore.instance;
+  final FirebaseAuth firebaseAuth;
+  final Firestore firestore;
 
-  CollectionReference refUser = firestore.collection("user");
-  CollectionReference refEvents = firestore.collection("events");
+  CollectionReference refUser;
+  CollectionReference refEvents;
+
   SharedPreferences prefs;
 
   final apiProvider = ApiProvider();
 
-  AppRepository() {
+  AppRepository({@required this.firebaseAuth, @required this.firestore})
+      : refUser = firestore.collection("user"),
+        refEvents = firestore.collection("events") {
     _initPrefs();
   }
 
@@ -49,25 +52,30 @@ class AppRepository {
   Future<FirebaseUser> signUpWithEmailPassword(User user) =>
       apiProvider.signUpUser(user);
 
-  Future<void> addUserToRemoteDb(User user) => apiProvider.addUserToFirestore(user);
+  Future<void> addUserToRemoteDb(User user) =>
+      apiProvider.addUserToFirestore(user);
 
-  Future<UnmodifiableListView<Interest>> fetchInterests() => apiProvider.fetchInterests();
+  Future<UnmodifiableListView<Interest>> fetchInterests() =>
+      apiProvider.fetchInterests();
 
-  Future<void> saveInterests(List<String> interests, FirebaseUser user) => apiProvider.saveInterests(interests, user);
+  Future<void> saveInterests(List<String> interests, FirebaseUser user) =>
+      apiProvider.saveInterests(interests, user);
 
-  Future<List<Event>> getEventsList(UserFireStore userFs) => apiProvider.getEventsList(userFs);
+  Future<List<Event>> getEventsList(UserFireStore userFs) =>
+      apiProvider.getEventsList(userFs);
 
-  Future<void> addFavorite(Event event, FirebaseUser user)  => apiProvider.addFavorite(event,user);
+  Future<void> addFavorite(Event event, FirebaseUser user) =>
+      apiProvider.addFavorite(event, user);
 
-  Future<void> removeFavorite(String eventId, FirebaseUser user)  => apiProvider.removeFavorite(eventId,user);
+  Future<void> removeFavorite(String eventId, FirebaseUser user) =>
+      apiProvider.removeFavorite(eventId, user);
 
-  Future<UserFireStore> getUserFromDb(FirebaseUser user) => apiProvider.getUserFromFirestore(user);
+  Future<UserFireStore> getUserFromDb(FirebaseUser user) =>
+      apiProvider.getUserFromFirestore(user);
 
-  Stream<StorageTaskEvent> uploadFile(File file) => apiProvider.uploadImage(file);
+  Stream<StorageTaskEvent> uploadFile(File file) =>
+      apiProvider.uploadImage(file);
 
   Future<void> createEvent(Event event) => apiProvider.createEvent(event);
-
 }
 
-
-AppRepository repository = AppRepository();

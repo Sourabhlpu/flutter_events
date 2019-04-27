@@ -1,34 +1,48 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/auth_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/blocs/create_event_bloc.dart';
-import 'package:flutter_events/blocs/home_bloc.dart';
-import 'package:flutter_events/blocs/interests_bloc.dart';
-import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/events/application_events.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/repository/app_repository.dart';
+import 'package:flutter_events/states/application_states.dart';
 import 'package:flutter_events/ui/pages/create_event.dart';
 import 'package:flutter_events/ui/pages/event_details.dart';
 import 'package:flutter_events/ui/pages/intro.dart';
 import 'package:flutter_events/ui/pages/auth.dart';
 import 'package:flutter_events/utils/custom_colors.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_events/ui/pages/interests.dart';
 import 'package:flutter_events/ui/pages/home.dart';
 import 'package:google_places_picker/google_places_picker.dart';
 
 void main() {
   /* debugPaintSizeEnabled=true;*/
-  runApp(BlocProvider<ApplicationBloc>(
-    bloc: ApplicationBloc(),
-    child: MyApp(),
-  ));
+  final Firestore firestore = Firestore.instance;
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+  AppRepository repository =
+      AppRepository(firebaseAuth: firebaseAuth, firestore: firestore);
+
+  ApplicationBloc applicationBloc = ApplicationBloc(repository: repository);
+
+  runApp(BlocProvider(
+      child: MyApp(
+        repository: repository,
+        bloc: applicationBloc,
+      ),
+      bloc: applicationBloc));
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-  AppRepository _repository = AppRepository();
+
+  final AppRepository repository;
+  final ApplicationBloc bloc;
+
+  MyApp({@required this.repository, this.bloc}) {
+    bloc.dispatch(AppStarted());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +55,6 @@ class MyApp extends StatelessWidget {
       iosApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
     );
 
-    var bloc = BlocProvider.of<ApplicationBloc>(context);
 
     //_initializePlacePicker();
 
@@ -66,43 +79,33 @@ class MyApp extends StatelessWidget {
         },
         routes: {
           '/auth': (context) => Authentication(repository: repository),
-          '/interests': (context) => BlocProvider<InterestsBloc>(
-                bloc: InterestsBloc(),
-                child: Interests(),
+          '/interests': (context) =>
+              Interests(repository: repository, applicationBloc: bloc),
+          '/home': (context) => HomePage(
+                repository: repository,
+                applicationBloc: bloc,
               ),
-          '/home': (context) => BlocProvider<HomeBloc>(
-                bloc: HomeBloc(bloc),
-                child: HomePage(),
-              ),
-          '/create_event': (context) => CreateEvent(appRepository: _repository)
+          '/create_event': (context) => CreateEvent(appRepository: repository)
         },
         home: _handleHomeScreen(context, bloc));
   }
 
   Widget _handleHomeScreen(BuildContext context, ApplicationBloc bloc) {
-    return StreamBuilder<CurrentHome>(
-      stream: BlocProvider.of<ApplicationBloc>(context).currentHome,
-      initialData: CurrentHome.noPage,
-      builder: (BuildContext context, AsyncSnapshot<CurrentHome> snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data == CurrentHome.introPage) {
+    return BlocBuilder<ApplicationEvents, ApplicationStates>(
+      bloc: bloc,
+      builder: (BuildContext context, ApplicationStates state) {
+        if (state is UserUnauthenticated) {
+          if (state.showIntro)
             return IntroPage();
-          } else if (snapshot.data == CurrentHome.authPage) {
+          else
             return Authentication(repository: repository);
-          } else if (snapshot.data == CurrentHome.interestsPage) {
-            return BlocProvider<InterestsBloc>(
-              bloc: InterestsBloc(),
-              child: Interests(),
-            );
-          } else if (snapshot.data == CurrentHome.homePage) {
-            return BlocProvider<HomeBloc>(
-              bloc: HomeBloc(bloc),
-              child: HomePage(),
-            );
-          } else if (snapshot.data == CurrentHome.noPage) {
-            return Container();
-          }
         }
+
+        if (state is UserAuthenticated) {
+          return HomePage(repository: repository, applicationBloc: bloc);
+        }
+
+        return Container();
       },
     );
   }

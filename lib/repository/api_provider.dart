@@ -20,6 +20,7 @@ class ApiProvider {
   CollectionReference refEvents = firestore.collection("events");
 
   Future<FirebaseUser> signInWithEmailPassword(User user) {
+
     return firebaseAuth.signInWithEmailAndPassword(
         email: user.email, password: user.password);
   }

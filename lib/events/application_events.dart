@@ -1,12 +1,32 @@
 import 'package:equatable/equatable.dart';
 
-abstract class ApplicationEvents extends Equatable{
-  ApplicationEvents([List props = const[]]) : super([props]);
+abstract class ApplicationEvents extends Equatable {
+  ApplicationEvents([List props = const []]) : super([props]);
 }
 
-class AppStarted extends ApplicationEvents{
+class AppStarted extends ApplicationEvents {
+  @override
+  String toString() => "App has started";
+}
+
+class UserAuthenticatedEvent extends ApplicationEvents {
+  @override
+  String toString() => "user authenticated event";
+}
+
+class UserUnauthenticatedEvent extends ApplicationEvents {
+  final bool showIntro;
+
+  UserUnauthenticatedEvent({this.showIntro}) : super([showIntro]);
+
+  @override
+  String toString() => "user un authenticated event; showIntro: $showIntro";
+}
+
+
+class IntroScreenButtonTapped extends ApplicationEvents{
 
 
   @override
-  String toString() => "App has started";
+  String toString() => "intro screen button tapped";
 }

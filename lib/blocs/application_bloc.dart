@@ -1,22 +1,99 @@
 import 'dart:async';
 import 'dart:collection';
+import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/delegates/addItem.dart';
+import 'package:flutter_events/events/application_events.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
+import 'package:flutter_events/states/application_states.dart';
 import 'package:flutter_events/utils/app_utils.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-enum CurrentHome { noPage, introPage, interestsPage, authPage, homePage }
-enum AddSinkType { signIn, signUp, interestType, saveInterests, uploadImage, createEvent }
-class ApplicationBloc implements BlocBase {
-  static FirebaseUser user;
-  static UserFireStore userFs;
-  AppRepository repository = new AppRepository();
+
+
+class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
+  FirebaseUser user;
+  UserFireStore userFs;
+  final AppRepository repository;
+  StreamSubscription authStateSubscription;
+
+  ApplicationBloc({@required this.repository});
+
+  @override
+  // TODO: implement initialState
+  get initialState => Initializing();
+
+  @override
+  Stream<ApplicationStates> mapEventToState(ApplicationEvents event) async* {
+    // TODO: implement mapEventToState
+    if (event is AppStarted) {
+      _getAuthStatus();
+    }
+
+    if (event is UserAuthenticatedEvent) {
+      yield UserAuthenticated();
+    }
+
+    if (event is UserUnauthenticatedEvent) {
+      yield UserUnauthenticated(showIntro: event.showIntro);
+    }
+
+    if (event is IntroScreenButtonTapped) {
+      _setPreference('shouldShowIntro', false);
+    }
+  }
+
+  _getAuthStatus() {
+    authStateSubscription?.cancel();
+
+    authStateSubscription = repository.firebaseAuth.onAuthStateChanged
+        .handleError(onError)
+        .listen((firebaseUser) {
+      user = firebaseUser;
+
+      _setLandingPage();
+    });
+  }
+
+  _setLandingPage() {
+    if (currentState is Initializing && _isUserAuthenticated()) {
+      _getUserFromFirestore();
+      _openHomePage();
+    } else if(currentState is Initializing) {
+      dispatch(UserUnauthenticatedEvent(showIntro: _shouldShowIntroPage()));
+    }
+  }
+
+  bool _isUserAuthenticated() {
+    return user != null;
+  }
+
+  _getUserFromFirestore() async {
+    userFs = await repository.getUserFromDb(user);
+  }
+
+  _openHomePage() {
+    dispatch(UserAuthenticatedEvent());
+  }
+
+  bool _shouldShowIntroPage() {
+    return _getBoolFromPreference('shouldShowIntro');
+  }
+
+  bool _getBoolFromPreference(String key) {
+    return repository.getBoolFromPrefs(key);
+  }
+
+  _setPreference(String key, var value) {
+    repository.setPrefsBool(key, value);
+  }
+
   //This stream will decide what will be displayed as the home screen depending upon the auth status
-  Stream<CurrentHome> get currentHome => _currentHomeController.stream;
+  /* Stream<CurrentHome> get currentHome => _currentHomeController.stream;
   final _currentHomeController =
   BehaviorSubject<CurrentHome>.seeded((CurrentHome.noPage));
   // This is the input sink to set the status of should show intro screen. This sets the preference value when the get started
@@ -40,9 +117,9 @@ class ApplicationBloc implements BlocBase {
       _setPreference('shouldShowIntro', value);
     });
   }
-  /*
+  */ /*
    * This method is listening to the auth status from firebase. When the status changes we show the home screen accordingly
-   */
+   */ /*
   void _onFirebaseAuthenticationChanged() {
     AppRepository.firebaseAuth.onAuthStateChanged.listen((firebaseUser) async {
       user = firebaseUser;
@@ -95,13 +172,13 @@ class ApplicationBloc implements BlocBase {
     userFs = await repository.getUserFromDb(user);
     _userFirestoreController.add(userFs);
   }
-  /*
+  */ /*
    * start fetching the list of interests from the firestore db
-   */
+   */ /*
   void _fetchInterests() async {
     if (await AppUtils.checkNetworkAvailability()) {
       UnmodifiableListView<Interest> _interestUnmut = await repository.fetchInterests();
       _interestListController.sink.add(_interestUnmut);
     }
-  }
+  }*/
 }

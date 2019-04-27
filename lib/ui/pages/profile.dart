@@ -1,7 +1,7 @@
 import 'package:built_collection/src/list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
 import 'package:flutter_events/utils/transparent_route.dart';
 import '../widgets/add_splash.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
@@ -54,24 +54,18 @@ class ProfilePageState extends State<ProfilePage> {
         backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        child: StreamBuilder(
-            stream: _applicationBloc.userFirestore,
-            builder: (context, AsyncSnapshot<UserFireStore> snapshot) {
-              if (snapshot.hasData)
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    _buildUserImageTile(snapshot.data),
-                    _getHorizontalDivider(),
-                    snapshot.hasData
-                        ? HorizontalListWithTitle(title:'Interests',
-                            list:_getInterestsList(snapshot.data.interests), isListExpandable: true)
-                        : Container(),
-                    _buildProfileActionList()
-                  ],
-                );
-              else return Container();
-            }),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            _buildUserImageTile(_applicationBloc.userFs),
+            _getHorizontalDivider(),
+            HorizontalListWithTitle(
+                title: 'Interests',
+                list: _getInterestsList(_applicationBloc.userFs.interests),
+                isListExpandable: true),
+            _buildProfileActionList()
+          ],
+        ),
       ),
     );
   }

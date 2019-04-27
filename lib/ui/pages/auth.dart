@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/delegates/addItem.dart';
 import 'package:flutter_events/events/auth_events.dart';
+import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/states/auth_states.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../widgets/loading_info.dart';
 import '../widgets/primary_btn.dart';
 import '../widgets/primary_btn_white.dart';
-import 'package:flutter_events/models/users/user.dart';
-import '../widgets/loading_info.dart';
 
 class Authentication extends StatefulWidget {
   final AppRepository repository;
@@ -25,7 +23,7 @@ class Authentication extends StatefulWidget {
   }
 }
 
-class _AuthenticationState extends State<Authentication> {
+class _AuthenticationState extends State<Authentication>  with TickerProviderStateMixin{
   final _signInformKey = GlobalKey<FormState>();
   final _signupformKey = GlobalKey<FormState>();
   String _userName;
@@ -33,9 +31,85 @@ class _AuthenticationState extends State<Authentication> {
   String _phone;
   String _password;
   String _emailOrPhone;
-  BuildContext contextSnackbar;
 
   AuthBloc _bloc;
+  bool obsecurePasswordField = true;
+  TabController tabController;
+
+  final List<Tab> tabs = <Tab>[
+    Tab(text: 'Sign In'),
+    Tab(text: 'Sign Up'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      body: Builder(
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  child: BlocListener(
+                    bloc: _bloc,
+                    listener: (context, state) {
+                      if (state is SignupSuccess) {
+                        Navigator.pushReplacementNamed(
+                            context, '/interests');
+                      }
+
+                      if (state is SigninSuccess) {
+                        Navigator.pushReplacementNamed(context, '/home');
+                      }
+
+                      if (state is AuthError) {
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                          content: Text('${state.error}'),
+                          backgroundColor: Colors.red,
+                        ));
+                      }
+                    },
+                    child: BlocBuilder<AuthenticationEvents,
+                            AuthenticationStates>(
+                        bloc: _bloc,
+                        builder: (BuildContext context,
+                            AuthenticationStates state) {
+                          return LoadingInfo(
+                            isLoading: state is Loading,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                TabBar(
+                                  controller: tabController,
+                                  tabs:tabs,
+                                  labelColor: Theme.of(context).primaryColor,
+                                  unselectedLabelColor: Colors.grey,
+                                  indicatorPadding:
+                                      const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                  labelPadding: const EdgeInsets.symmetric(
+                                      vertical: 4.0),
+                                ),
+                                Flexible(
+                                  flex: 1,
+                                  fit: FlexFit.loose,
+                                  child: TabBarView(children: [
+                                    _buildSignInForm(),
+                                    _buildSignupForm()
+                                  ],controller: tabController,),
+                                )
+                              ],
+                            ),
+                          );
+                        }),
+                  )),
+            ),
+          );
+        },
+      ),
+      backgroundColor: Colors.white,
+    );
+  }
 
   @override
   void initState() {
@@ -43,82 +117,17 @@ class _AuthenticationState extends State<Authentication> {
     super.initState();
 
     _bloc = AuthBloc(repository: widget.repository);
-  }
+    
+    tabController = TabController(length: 2, vsync: this);
 
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      body: Builder(
-        builder: (BuildContext context) {
-          this.contextSnackbar = context;
-          return SafeArea(
-            child: DefaultTabController(
-              length: 2,
-              child: SingleChildScrollView(
-                child: Container(
-                  height: MediaQuery.of(context).size.height,
-                  child: BlocBuilder<AuthenticationEvents,
-                          AuthenticationStates>(
-                      bloc: _bloc,
-                      builder:
-                          (BuildContext context, AuthenticationStates state) {
-                        if (state is AuthError) {
-                          _onWidgetDidBuild(() {
-                            Scaffold.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${state.error}'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          });
-                        }
+    tabController.addListener((){
 
-                        if (state is SignupSuccess) {
-                          Navigator.pushReplacementNamed(
-                              contextSnackbar, '/home');
-                        }
+      setState(() {
+        obsecurePasswordField = true;
+      });
 
-                        if (state is SigninSuccess) {
-                          Navigator.pushReplacementNamed(
-                              contextSnackbar, '/interests');
-                        }
-                        return LoadingInfo(
-                          isLoading: state is Loading,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              TabBar(
-                                tabs: [
-                                  Tab(text: 'Sign In'),
-                                  Tab(text: 'Sign Up'),
-                                ],
-                                labelColor: Theme.of(context).primaryColor,
-                                unselectedLabelColor: Colors.grey,
-                                indicatorPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0),
-                                labelPadding:
-                                    const EdgeInsets.symmetric(vertical: 4.0),
-                              ),
-                              Flexible(
-                                flex: 1,
-                                fit: FlexFit.loose,
-                                child: TabBarView(children: [
-                                  _buildSignInForm(),
-                                  _buildSignupForm()
-                                ]),
-                              )
-                            ],
-                          ),
-                        );
-                      }),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-      backgroundColor: Colors.white,
-    );
+
+    });
   }
 
   _buildEmailTextField(String hint) {
@@ -130,53 +139,33 @@ class _AuthenticationState extends State<Authentication> {
     );
   }
 
-  _buildPasswordTextField() {
-    return TextFormField(
-      obscureText: true,
-      decoration:
-          _getFormFieldInputDecoration('Password', Icons.remove_red_eye),
-      validator: (value) => value.isEmpty ? 'please enter password' : null,
-      onSaved: (value) => _password = value,
-    );
-  }
-
   _buildNameTextField() {
     return TextFormField(
+      keyboardType: TextInputType.text,
       decoration: _getFormFieldInputDecoration('Name', Icons.account_box),
       validator: (value) => value.isEmpty ? 'please enter name' : null,
       onSaved: (value) => _userName = value,
     );
   }
 
-  _buildPhoneTextField() {
+  _buildPasswordTextField(bool obscureText) {
+
+    IconData iconData = obscureText ? Icons.remove_red_eye : Icons.lock;
     return TextFormField(
-      decoration: _getFormFieldInputDecoration('Phone', Icons.phone),
-      validator: (value) => value.isEmpty ? 'please enter phone' : null,
-      onSaved: (value) => _phone = value,
+      obscureText: obscureText,
+      decoration:
+          _getFormFieldInputDecoration('Password', iconData),
+      validator: (value) => value.isEmpty ? 'please enter password' : null,
+      onSaved: (value) => _password = value,
     );
   }
 
-  InputDecoration _getFormFieldInputDecoration(String hint, IconData icon) {
-    return InputDecoration(
-      hintText: hint,
-      suffixIcon: Icon(
-        icon,
-        size: 16.0,
-      ),
-      hintStyle: TextStyle(fontSize: 12.0, color: Colors.grey[400]),
-      hasFloatingPlaceholder: false,
-      border: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
-      focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: const Color(0xFFED5D66))),
-      disabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
-      enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
-      errorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
-      focusedErrorBorder: UnderlineInputBorder(
-          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+  _buildPhoneTextField() {
+    return TextFormField(
+      keyboardType: TextInputType.number,
+      decoration: _getFormFieldInputDecoration('Phone', Icons.phone),
+      validator: (value) => value.isEmpty ? 'please enter phone' : null,
+      onSaved: (value) => _phone = value,
     );
   }
 
@@ -191,7 +180,7 @@ class _AuthenticationState extends State<Authentication> {
             SizedBox(
               height: 8.0,
             ),
-            _buildPasswordTextField(),
+            _buildPasswordTextField(obsecurePasswordField),
             SizedBox(
               height: 8.0,
             ),
@@ -243,7 +232,7 @@ class _AuthenticationState extends State<Authentication> {
             SizedBox(
               height: 8.0,
             ),
-            _buildPasswordTextField(),
+            _buildPasswordTextField(obsecurePasswordField),
             SizedBox(
               height: 20.0,
             ),
@@ -286,9 +275,38 @@ class _AuthenticationState extends State<Authentication> {
     }
   }
 
-  void _onWidgetDidBuild(Function callback) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      callback();
-    });
+  InputDecoration _getFormFieldInputDecoration(String hint, IconData icon) {
+    return InputDecoration(
+      hintText: hint,
+      suffixIcon: IconButton(
+          icon: Icon(
+            icon,
+            size: 16,
+          ),
+          onPressed: () {
+            if(icon == Icons.remove_red_eye || icon == Icons.lock)
+              {
+                setState(() {
+                  obsecurePasswordField = !obsecurePasswordField;
+                });
+              }
+          }),
+      hintStyle: TextStyle(fontSize: 12.0, color: Colors.grey[400]),
+      hasFloatingPlaceholder: false,
+      border: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+      focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: const Color(0xFFED5D66))),
+      disabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+      enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+      errorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+      focusedErrorBorder: UnderlineInputBorder(
+          borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
+    );
   }
+
+
 }

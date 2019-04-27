@@ -57,7 +57,9 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
             .asStream()
             .handleError(_handleAuthError)
             .listen((firebaseUser) {
-          dispatch(SigninSuccessEvent());
+          repository.addUserToRemoteDb(user).whenComplete(() {
+            dispatch(SigninSuccessEvent());
+          });
         });
       }
     } else {
@@ -75,8 +77,9 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
           .asStream()
           .handleError(_handleAuthError)
           .listen((firebaseUser) {
-        dispatch(SignupSuccessEvent());
-        repository.addUserToRemoteDb(user);
+        repository.addUserToRemoteDb(user).whenComplete(() {
+          dispatch(SignupSuccessEvent());
+        });
       });
     } else {
       yield AuthError(error: "No Internet");

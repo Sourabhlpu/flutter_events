@@ -1,37 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/blocs/bloc_provider.dart';
+import 'package:flutter_events/blocs/home_bloc.dart';
 import 'package:flutter_events/delegates/addItem.dart';
+import 'package:flutter_events/events/home_events.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/repository/app_repository.dart';
+import 'package:flutter_events/states/home_states.dart';
 import 'package:flutter_events/ui/pages/profile.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_events/blocs/home_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
 
 class HomePage extends StatefulWidget {
+  final HomeBloc bloc;
+  final AppRepository repository;
+  final ApplicationBloc applicationBloc;
+
+  HomePage({@required this.repository, @required this.applicationBloc})
+      : bloc =
+            HomeBloc(repository: repository, applicationBloc: applicationBloc) {
+    bloc.dispatch(FetchEventList());
+  }
+
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> implements AddItemDelegate {
-  HomeBloc _bloc;
+class _HomePageState extends State<HomePage> {
   BuildContext _snackbarContext;
   int _currentBottomBarIndex = 0;
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    _bloc = BlocProvider.of<HomeBloc>(context);
-    _bloc.addItem(this);
-  }
-
-  _onCardItemTapped(int index, Event event, BuildContext context) {
-    Navigator.pushNamed(context, '/event_details', arguments: event);
-  }
+  HomeBloc get _bloc => widget.bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -48,21 +50,26 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
         body: _getBody());
   }
 
-  List<Widget> _getTabs() {
-    return [
-      Tab(
-        text: 'Recommended',
-      ),
-      Tab(
-        text: 'Upcoming',
-      ),
-      Tab(
-        text: 'Popular',
-      ),
-      Tab(
-        text: 'All',
-      )
-    ];
+  @override
+  void onError(String message) {
+    // TODO: implement onError
+    final snackbar = SnackBar(content: Text(message));
+
+    Scaffold.of(_snackbarContext).showSnackBar(snackbar);
+    print(message);
+  }
+
+  @override
+  void onSuccess(SuccessType type) {
+    // TODO: implement onSuccess
+  }
+
+  _getBody() {
+    if (_currentBottomBarIndex == 3) {
+      return ProfilePage();
+    } else {
+      return _getHomeForBottomNav();
+    }
   }
 
   List<BottomNavigationBarItem> _getBottomNavigationBarItems() {
@@ -103,32 +110,6 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
     ];
   }
 
-  _setCurrentBottomBarIndex(int index) {
-    _currentBottomBarIndex = index;
-  }
-
-  @override
-  void onError(String message) {
-    // TODO: implement onError
-    final snackbar = SnackBar(content: Text(message));
-
-    Scaffold.of(_snackbarContext).showSnackBar(snackbar);
-    print(message);
-  }
-
-  @override
-  void onSuccess(SuccessType type) {
-    // TODO: implement onSuccess
-  }
-
-  _getBody() {
-    if (_currentBottomBarIndex == 3) {
-      return ProfilePage();
-    } else {
-      return _getHomeForBottomNav();
-    }
-  }
-
   _getHomeForBottomNav() {
     return DefaultTabController(
       length: 4,
@@ -147,47 +128,84 @@ class _HomePageState extends State<HomePage> implements AddItemDelegate {
             unselectedLabelColor: Colors.grey,
           ),
         ),
-        body: LoadingInfo(
-          isLoading: false,
-          child: TabBarView(children: [
-            Tab(
-              child: StreamBuilder(
-                  initialData: List<Event>(),
-                  stream: _bloc.eventList,
-                  builder: (context, AsyncSnapshot<List<Event>> snapshots) {
-                    _snackbarContext = context;
+        body: TabBarView(children: [
+          Tab(
+            child: BlocBuilder<HomeEvents, HomeState>(
+                bloc: _bloc,
+                builder: (BuildContext context, HomeState state) {
+                  if (state is ListLoadingError) {
+                    _onWidgetDidBuild(() {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${state.error}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    });
+                  }
 
-                    if (snapshots.hasData && snapshots.data.length > 0) {
-                      return ListView.builder(
-                          padding: const EdgeInsets.all(8.0),
-                          itemCount: snapshots.data.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return CardListItem(snapshots.data[index],
-                                _onCardItemTapped, index, _bloc);
-                          });
-                    } else {
-                      return Container();
-                    }
-                  }),
+                  return LoadingInfo(
+                    isLoading: state is Loading,
+                    child: state is ListLoaded
+                        ? ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: state.events.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(state.events[index],
+                                  _onCardItemTapped, index, _bloc);
+                            })
+                        : Container(),
+                  );
+                }),
+          ),
+          Tab(
+            child: Center(
+              child: Text('upcoming'),
             ),
-            Tab(
-              child: Center(
-                child: Text('upcoming'),
-              ),
+          ),
+          Tab(
+            child: Center(
+              child: Text('popular'),
             ),
-            Tab(
-              child: Center(
-                child: Text('popular'),
-              ),
+          ),
+          Tab(
+            child: Center(
+              child: Text('all'),
             ),
-            Tab(
-              child: Center(
-                child: Text('all'),
-              ),
-            )
-          ]),
-        ),
+          )
+        ]),
       ),
     );
+  }
+
+  List<Widget> _getTabs() {
+    return [
+      Tab(
+        text: 'Recommended',
+      ),
+      Tab(
+        text: 'Upcoming',
+      ),
+      Tab(
+        text: 'Popular',
+      ),
+      Tab(
+        text: 'All',
+      )
+    ];
+  }
+
+  _onCardItemTapped(int index, Event event, BuildContext context) {
+    Navigator.pushNamed(context, '/event_details', arguments: event);
+  }
+
+  void _onWidgetDidBuild(Function callback) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callback();
+    });
+  }
+
+  _setCurrentBottomBarIndex(int index) {
+    _currentBottomBarIndex = index;
   }
 }
