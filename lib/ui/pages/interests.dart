@@ -30,7 +30,6 @@ class Interests extends StatefulWidget {
 }
 
 class _InterestsState extends State<Interests> {
-  BuildContext _context;
 
   InterestsBloc get _bloc => widget.bloc;
 

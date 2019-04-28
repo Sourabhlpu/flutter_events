@@ -17,14 +17,11 @@ import 'package:rxdart/rxdart.dart';
 
 class HomeBloc extends Bloc<HomeEvents, HomeState> {
   AppRepository repository;
-  ApplicationBloc applicationBloc;
   UserFireStore _userFs;
-  FirebaseUser _user;
   StreamSubscription streamSubscription;
 
-  HomeBloc({@required this.repository, @required this.applicationBloc})
-      : _userFs = applicationBloc.userFs,
-        _user = applicationBloc.user;
+  HomeBloc({@required this.repository})
+      : _userFs = repository.getUserFsFromPrefs();
 
   @override
   HomeState get initialState => HomeStateUninitialized();
@@ -73,14 +70,14 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     if (await AppUtils.checkNetworkAvailability()) {
       if (events[index].isFavorite) {
         repository
-            .addFavorite(events[index], _user)
+            .addFavorite(events[index], _userFs)
             .then((_) {})
             .catchError(() {
           _changeFavoriteStatusInEventsList(index);
         });
       } else {
         repository
-            .removeFavorite(events[index].id, _user)
+            .removeFavorite(events[index].id, _userFs)
             .then((_) {})
             .catchError(() {
           _changeFavoriteStatusInEventsList(index);

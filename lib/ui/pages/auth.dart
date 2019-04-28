@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/auth_bloc.dart';
 import 'package:flutter_events/events/auth_events.dart';
 import 'package:flutter_events/models/users/user.dart';
@@ -14,8 +15,9 @@ import '../widgets/primary_btn_white.dart';
 
 class Authentication extends StatefulWidget {
   final AppRepository repository;
+  final ApplicationBloc applicationBloc;
 
-  Authentication({@required this.repository});
+  Authentication({@required this.repository, @required this.applicationBloc});
 
   @override
   _AuthenticationState createState() {
@@ -23,7 +25,8 @@ class Authentication extends StatefulWidget {
   }
 }
 
-class _AuthenticationState extends State<Authentication>  with TickerProviderStateMixin{
+class _AuthenticationState extends State<Authentication>
+    with TickerProviderStateMixin {
   final _signInformKey = GlobalKey<FormState>();
   final _signupformKey = GlobalKey<FormState>();
   String _userName;
@@ -54,12 +57,14 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
                     bloc: _bloc,
                     listener: (context, state) {
                       if (state is SignupSuccess) {
-                        Navigator.pushReplacementNamed(
-                            context, '/interests');
+                        Navigator.pushReplacementNamed(context, '/interests');
                       }
 
                       if (state is SigninSuccess) {
-                        Navigator.pushReplacementNamed(context, '/home');
+                        if (state.shouldInterests)
+                          Navigator.pushReplacementNamed(context, '/interests');
+                        else
+                          Navigator.pushReplacementNamed(context, '/home');
                       }
 
                       if (state is AuthError) {
@@ -72,8 +77,8 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
                     child: BlocBuilder<AuthenticationEvents,
                             AuthenticationStates>(
                         bloc: _bloc,
-                        builder: (BuildContext context,
-                            AuthenticationStates state) {
+                        builder:
+                            (BuildContext context, AuthenticationStates state) {
                           return LoadingInfo(
                             isLoading: state is Loading,
                             child: Column(
@@ -81,22 +86,24 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
                               children: <Widget>[
                                 TabBar(
                                   controller: tabController,
-                                  tabs:tabs,
+                                  tabs: tabs,
                                   labelColor: Theme.of(context).primaryColor,
                                   unselectedLabelColor: Colors.grey,
-                                  indicatorPadding:
-                                      const EdgeInsets.symmetric(
-                                          horizontal: 16.0),
-                                  labelPadding: const EdgeInsets.symmetric(
-                                      vertical: 4.0),
+                                  indicatorPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0),
+                                  labelPadding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
                                 ),
                                 Flexible(
                                   flex: 1,
                                   fit: FlexFit.loose,
-                                  child: TabBarView(children: [
-                                    _buildSignInForm(),
-                                    _buildSignupForm()
-                                  ],controller: tabController,),
+                                  child: TabBarView(
+                                    children: [
+                                      _buildSignInForm(),
+                                      _buildSignupForm()
+                                    ],
+                                    controller: tabController,
+                                  ),
                                 )
                               ],
                             ),
@@ -116,17 +123,14 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
     // TODO: implement initState
     super.initState();
 
-    _bloc = AuthBloc(repository: widget.repository);
-    
+    _bloc = AuthBloc(repository: widget.repository, applicationBloc: widget.applicationBloc);
+
     tabController = TabController(length: 2, vsync: this);
 
-    tabController.addListener((){
-
+    tabController.addListener(() {
       setState(() {
         obsecurePasswordField = true;
       });
-
-
     });
   }
 
@@ -149,12 +153,10 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
   }
 
   _buildPasswordTextField(bool obscureText) {
-
     IconData iconData = obscureText ? Icons.remove_red_eye : Icons.lock;
     return TextFormField(
       obscureText: obscureText,
-      decoration:
-          _getFormFieldInputDecoration('Password', iconData),
+      decoration: _getFormFieldInputDecoration('Password', iconData),
       validator: (value) => value.isEmpty ? 'please enter password' : null,
       onSaved: (value) => _password = value,
     );
@@ -206,7 +208,7 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
                 ),
               ),
             ),
-            PrimaryWhiteButton('Sign In with google', _doSignIn),
+            PrimaryWhiteButton('Sign In with google', _doSignInWithGoogle),
           ],
         ),
       ),
@@ -262,6 +264,10 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
     }
   }
 
+  void _doSignInWithGoogle() {
+    _bloc.dispatch(SignInWithGooglePressed());
+  }
+
   void _doSignUp() {
     if (_signupformKey.currentState.validate()) {
       _signupformKey.currentState.save();
@@ -284,12 +290,11 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
             size: 16,
           ),
           onPressed: () {
-            if(icon == Icons.remove_red_eye || icon == Icons.lock)
-              {
-                setState(() {
-                  obsecurePasswordField = !obsecurePasswordField;
-                });
-              }
+            if (icon == Icons.remove_red_eye || icon == Icons.lock) {
+              setState(() {
+                obsecurePasswordField = !obsecurePasswordField;
+              });
+            }
           }),
       hintStyle: TextStyle(fontSize: 12.0, color: Colors.grey[400]),
       hasFloatingPlaceholder: false,
@@ -307,6 +312,4 @@ class _AuthenticationState extends State<Authentication>  with TickerProviderSta
           borderSide: BorderSide(width: 0.5, color: Colors.grey[400])),
     );
   }
-
-
 }

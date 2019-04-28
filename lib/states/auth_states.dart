@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:meta/meta.dart';
 
 class AuthenticationStates extends Equatable {
@@ -18,6 +19,10 @@ class Loading extends AuthenticationStates{
 }
 
 class SigninSuccess extends AuthenticationStates {
+
+  bool shouldInterests;
+
+  SigninSuccess({this.shouldInterests}) : super([shouldInterests]);
   @override
   String toString() => "logged in";
 }

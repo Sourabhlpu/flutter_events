@@ -55,7 +55,6 @@ class MyApp extends StatelessWidget {
       iosApiKey: "AIzaSyAwXVF-Nlee02gd98JazpI75qWT2Hy4h7U",
     );
 
-
     //_initializePlacePicker();
 
     return MaterialApp(
@@ -78,7 +77,7 @@ class MyApp extends StatelessWidget {
           return null;
         },
         routes: {
-          '/auth': (context) => Authentication(repository: repository),
+          '/auth': (context) => Authentication(repository: repository, applicationBloc: bloc,),
           '/interests': (context) =>
               Interests(repository: repository, applicationBloc: bloc),
           '/home': (context) => HomePage(
@@ -98,11 +97,13 @@ class MyApp extends StatelessWidget {
           if (state.showIntro)
             return IntroPage();
           else
-            return Authentication(repository: repository);
+            return Authentication(repository: repository, applicationBloc: bloc,);
         }
 
         if (state is UserAuthenticated) {
-          return HomePage(repository: repository, applicationBloc: bloc);
+          return state.showInterestsScreen
+              ? Interests(repository: repository, applicationBloc: bloc)
+              : HomePage(repository: repository, applicationBloc: bloc);
         }
 
         return Container();

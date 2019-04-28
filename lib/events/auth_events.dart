@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_events/models/users/user.dart';
+import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:meta/meta.dart';
 
 class AuthenticationEvents extends Equatable{
@@ -42,7 +43,9 @@ class AuthErrorEvent extends AuthenticationEvents{
 
 class SigninSuccessEvent extends AuthenticationEvents{
 
+  final bool shouldShowInterests;
 
+  SigninSuccessEvent({this.shouldShowInterests}) : super([shouldShowInterests]);
   @override
   String toString() => "Sign in success event";
 }
@@ -52,4 +55,11 @@ class SignupSuccessEvent extends AuthenticationEvents{
 
   @override
   String toString() => "Signup success event";
+}
+
+class SignInWithGooglePressed extends AuthenticationEvents{
+
+
+  @override
+  String toString() => "Signin with google pressed";
 }

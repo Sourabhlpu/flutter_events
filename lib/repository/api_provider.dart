@@ -10,6 +10,7 @@ import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as p;
+import 'package:google_sign_in/google_sign_in.dart';
 
 class ApiProvider {
   static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -18,6 +19,25 @@ class ApiProvider {
 
   CollectionReference refUser = firestore.collection("user");
   CollectionReference refEvents = firestore.collection("events");
+
+  Future<GoogleSignInAccount> signInWithGoogle()
+  {
+
+    return _getGoogleSignIn().signIn();
+  }
+
+  GoogleSignIn _getGoogleSignIn()
+  {
+    GoogleSignIn _googleSignIn = GoogleSignIn(
+      scopes: [
+        'email',
+        'https://www.googleapis.com/auth/contacts.readonly',
+      ],
+    );
+
+    return _googleSignIn;
+  }
+
 
   Future<FirebaseUser> signInWithEmailPassword(User user) {
 
@@ -99,14 +119,26 @@ class ApiProvider {
   }
 
   Future<void> addUserToFirestore(User user) {
+
     return refUser.document(user.email).setData({
       'name': user.name,
       'email': user.email,
       'phoneNumber': user.phoneNumber
     });
+
+  /*  refUser.document(user.email).get().then((document){
+      if(!document.exists)
+        {
+
+
+           return true;
+        }
+        else return false;
+    });*/
+
   }
 
-  Future<void> addFavorite(Event event, FirebaseUser user) {
+  Future<void> addFavorite(Event event, UserFireStore user) {
     List<String> eventId = [event.id];
 
     return refUser
@@ -114,7 +146,7 @@ class ApiProvider {
         .updateData({'favorites': FieldValue.arrayUnion(eventId)});
   }
 
-  Future<void> removeFavorite(String eventId, FirebaseUser user) {
+  Future<void> removeFavorite(String eventId, UserFireStore user) {
     List<String> event = List<String>();
     event.add(eventId);
     return refUser.document(user.email).updateData(
@@ -123,12 +155,23 @@ class ApiProvider {
     });
   }
 
-  Future<UserFireStore> getUserFromFirestore(FirebaseUser user) {
-    return refUser.document(user.email).get().then((snapshots) {
-      //return standardSerializers.deserializeWith(UserFireStore.serializer, snapshots.data);
+  Future<UserFireStore> getUserFromFirestore(String email) {
+
+    return refUser.document(email).get().then((snapshots){
       return standardSerializers.deserializeWith(
           UserFireStore.serializer, snapshots.data);
+    }).catchError((error){
+      print(error);
     });
+
+  /*   refUser.document(email).get().then((snapshots) {
+      //return standardSerializers.deserializeWith(UserFireStore.serializer, snapshots.data);
+       print(snapshots.data);
+
+    }).catchError((error){
+
+      print(error);
+     });*/
   }
 
   Stream<StorageTaskEvent> uploadImage(File imageFile) {
@@ -144,4 +187,6 @@ class ApiProvider {
         .document()
         .setData(standardSerializers.serializeWith(Event.serializer, event));
   }
+
+
 }

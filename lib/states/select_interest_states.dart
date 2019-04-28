@@ -44,7 +44,7 @@ class GenericError extends SelectInterestStates{
 
   String error;
 
-  GenericError({@required error}) : super([error]);
+  GenericError({@required this.error}) : super([error]);
 
   @override
   String toString() => "error: $error";

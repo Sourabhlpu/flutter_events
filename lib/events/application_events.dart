@@ -10,6 +10,10 @@ class AppStarted extends ApplicationEvents {
 }
 
 class UserAuthenticatedEvent extends ApplicationEvents {
+
+  final bool showInterestsScreen;
+
+  UserAuthenticatedEvent({this.showInterestsScreen}) : super([showInterestsScreen]);
   @override
   String toString() => "user authenticated event";
 }

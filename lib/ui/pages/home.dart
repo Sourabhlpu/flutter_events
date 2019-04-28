@@ -21,7 +21,7 @@ class HomePage extends StatefulWidget {
 
   HomePage({@required this.repository, @required this.applicationBloc})
       : bloc =
-            HomeBloc(repository: repository, applicationBloc: applicationBloc) {
+            HomeBloc(repository: repository) {
     bloc.dispatch(FetchEventList());
   }
 

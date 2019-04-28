@@ -20,6 +20,11 @@ class UserUnauthenticated extends ApplicationStates {
 }
 
 class UserAuthenticated extends ApplicationStates {
+
+  final bool showInterestsScreen;
+
+  UserAuthenticated({this.showInterestsScreen}) : super([showInterestsScreen]);
   @override
   String toString() => "user authenticated";
 }
+
