@@ -19,17 +19,22 @@ import 'dart:convert';
 class AppRepository {
   final FirebaseAuth firebaseAuth;
   final Firestore firestore;
+  final GoogleSignIn googleSignIn;
 
   CollectionReference refUser;
   CollectionReference refEvents;
 
   SharedPreferences prefs;
 
-  final apiProvider = ApiProvider();
+  final ApiProvider apiProvider;
 
-  AppRepository({@required this.firebaseAuth, @required this.firestore})
+  AppRepository({@required this.firebaseAuth, @required this.firestore, @required this.googleSignIn})
       : refUser = firestore.collection("user"),
-        refEvents = firestore.collection("events") {
+        refEvents = firestore.collection("events"),
+        apiProvider = ApiProvider(
+          firebaseAuth: firebaseAuth,
+          firestore: firestore,
+          googleSignIn: googleSignIn) {
     _initPrefs();
   }
 
@@ -48,6 +53,11 @@ class AppRepository {
     if(prefs.get('showInterestsSelection') == null) {
 
       prefs.setBool('showInterestsSelection', false);
+    }
+
+    if(prefs.get("isGoogleAuthenticated") == null) {
+
+      prefs.setBool("isGoogleAuthenticated", false);
     }
   }
 
@@ -87,14 +97,14 @@ class AppRepository {
   Future<FirebaseUser> signUpWithEmailPassword(User user) =>
       apiProvider.signUpUser(user);
 
-  Future<void> addUserToRemoteDb(User user) =>
+  Future<bool> addUserToRemoteDb(User user) =>
       apiProvider.addUserToFirestore(user);
 
   Future<UnmodifiableListView<Interest>> fetchInterests() =>
       apiProvider.fetchInterests();
 
-  Future<void> saveInterests(List<String> interests, FirebaseUser user) =>
-      apiProvider.saveInterests(interests, user);
+  Future<void> saveInterests(List<String> interests, String email) =>
+      apiProvider.saveInterests(interests, email);
 
   Future<List<Event>> getEventsList(UserFireStore userFs) =>
       apiProvider.getEventsList(userFs);

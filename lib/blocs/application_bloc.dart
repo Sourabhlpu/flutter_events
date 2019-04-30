@@ -11,14 +11,17 @@ import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/states/application_states.dart';
 import 'package:flutter_events/utils/app_utils.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   FirebaseUser user;
   UserFireStore userFs;
+  GoogleSignInAccount googleSignInAccount;
   final AppRepository repository;
   StreamSubscription authStateSubscription;
+  StreamSubscription googleAuthStateSubscription;
 
   ApplicationBloc({@required this.repository});
 
@@ -53,6 +56,7 @@ class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   _getAuthStatus() {
     authStateSubscription?.cancel();
 
+
     authStateSubscription = repository.firebaseAuth.onAuthStateChanged
         .handleError(onError)
         .listen((firebaseUser) {
@@ -61,6 +65,7 @@ class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
       _setLandingPage();
       authStateSubscription?.cancel();
     });
+
   }
 
   _setLandingPage() {
@@ -77,7 +82,7 @@ class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   }
 
   bool _isUserAuthenticated() {
-    return user != null;
+    return (user != null || repository.getBoolFromPrefs("isGoogleAuthenticated"));
   }
 
   _getUserFromFirestore() async {

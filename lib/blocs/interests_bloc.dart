@@ -122,13 +122,15 @@ class InterestsBloc extends Bloc<SelectInterestEvents, SelectInterestStates> {
       }
     } else {
       if (await AppUtils.checkNetworkAvailability()) {
+
+        UserFireStore userFireStore = repository.getUserFsFromPrefs();
         repository
-            .saveInterests(savedList, _user)
+            .saveInterests(savedList, userFireStore.email)
             .catchError(_handleError)
             .whenComplete(() {
           repository.setPrefsBool("showInterestsSelection", false);
 
-          repository.getUserFromDb(_user.email).then((userFs) {
+          repository.getUserFromDb(userFireStore.email).then((userFs) {
             repository.saveUserFsToPrefs(userFs);
             dispatch(InterestsSavedEvent());
           });

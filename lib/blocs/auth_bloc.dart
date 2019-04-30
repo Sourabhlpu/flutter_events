@@ -54,7 +54,9 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
       yield SignupSuccess();
     }
 
-    if (event is SignInWithGooglePressed) {}
+    if (event is SignInWithGooglePressed) {
+      yield* _mapSignInWithGooglToState();
+    }
   }
 
   _handleAuthError(error) {
@@ -76,13 +78,7 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
             .asStream()
             .handleError(_handleAuthError)
             .listen((firebaseUser) {
-          repository.getUserFromDb(firebaseUser.email).then((userFirestore) {
-            //applicationBloc.userFs = userFirestore;
-            repository.saveUserFsToPrefs(userFirestore);
-            dispatch(SigninSuccessEvent(
-                shouldShowInterests:
-                    _shouldShowInterestsScreen(userFirestore)));
-          });
+          _signinSuccessAction(firebaseUser.email);
         });
       }
     } else {
@@ -103,7 +99,18 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
             name: googleSignInAccount.displayName,
             email: googleSignInAccount.email);
 
-        repository.addUserToRemoteDb(user).then((doesUserExist) {});
+        repository.addUserToRemoteDb(user).then((isSignup) {
+          repository.setPrefsBool("isGoogleAuthenticated", true);
+          if (isSignup) {
+            UserFireStore userFs = UserFireStore((b) => b
+              ..email = user.email
+              ..name = user.name);
+
+            _signupSuccesAction(userFs);
+          } else {
+            _signinSuccessAction(user.email);
+          }
+        });
       });
     } else {
       yield AuthError(error: "No Internet");
@@ -121,8 +128,10 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
           .handleError(_handleAuthError)
           .listen((firebaseUser) {
         repository.addUserToRemoteDb(user).then((value) {
-          repository.setPrefsBool("showInterestsSelection", true);
-          dispatch(SignupSuccessEvent());
+          UserFireStore userFs = UserFireStore((b) => b
+            ..email = user.email
+            ..name = user.name);
+          _signupSuccesAction(userFs);
         });
       });
     } else {
@@ -131,11 +140,25 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
   }
 
   _shouldShowInterestsScreen(UserFireStore userFs) {
-
-    bool showInterests = userFs.interests == null || (userFs != null && userFs.interests.isEmpty);
+    bool showInterests = userFs.interests == null ||
+        (userFs != null && userFs.interests.isEmpty);
 
     repository.setPrefsBool("showInterestsSelection", showInterests);
 
     return showInterests;
+  }
+
+  _signupSuccesAction(UserFireStore userFs) {
+    repository.setPrefsBool("showInterestsSelection", true);
+    repository.saveUserFsToPrefs(userFs);
+    dispatch(SignupSuccessEvent());
+  }
+
+  _signinSuccessAction(String email) {
+    repository.getUserFromDb(email).then((userFirestore) {
+      repository.saveUserFsToPrefs(userFirestore);
+      dispatch(SigninSuccessEvent(
+          shouldShowInterests: _shouldShowInterestsScreen(userFirestore)));
+    });
   }
 }

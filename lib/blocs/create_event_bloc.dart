@@ -27,19 +27,19 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
   @override
   Stream<CreateEventStates> mapEventToState(CreateEventEvents event) async* {
-
     if (event is FetchEventType) {
       //todo return a list of event types as streams
 
       yield ListFetched(eventType: _getEventTypeList());
     }
     if (event is CreateEventPressed) {
+      yield CreateEventLoading();
+
+      await Future.delayed(Duration(seconds: 2));
 
       if (_validateEvent(event.event) != null) {
         yield CreateEventFailure(error: _validateEvent(event.event));
       } else {
-        yield CreateEventLoading();
-
         try {
           repository.createEvent(event.event);
           yield CreateEventSuccess();
@@ -49,7 +49,6 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
       }
     }
     if (event is AddCoverImageTapped) {
-
       try {
         File image = await ImagePicker.pickImage(source: ImageSource.gallery);
         yield (UploadingImage(fileName: image.path));
@@ -109,7 +108,8 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
     _eventTypes.removeAt(event.index + 1);
   }
 
-  _listenToUploadEvents(Stream<StorageTaskEvent> taskEvent, String localImagePath) {
+  _listenToUploadEvents(
+      Stream<StorageTaskEvent> taskEvent, String localImagePath) {
     taskEvent.listen((event) async {
       if (event.type == StorageTaskEventType.success) {
         String imageUrl = await event.snapshot.ref.getDownloadURL();
@@ -119,8 +119,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   }
 
   _validateEvent(Event event) {
-
-    if(currentState is UploadingImage)
+    if (currentState is UploadingImage)
       return "Please wait while the image is uploading";
     if (event.eventType.isEmpty)
       return "Please select event type";

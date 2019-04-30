@@ -15,14 +15,21 @@ import 'package:flutter_events/utils/custom_colors.dart';
 import 'package:flutter_events/ui/pages/interests.dart';
 import 'package:flutter_events/ui/pages/home.dart';
 import 'package:google_places_picker/google_places_picker.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 void main() {
   /* debugPaintSizeEnabled=true;*/
   final Firestore firestore = Firestore.instance;
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: [
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   AppRepository repository =
-      AppRepository(firebaseAuth: firebaseAuth, firestore: firestore);
+      AppRepository(firebaseAuth: firebaseAuth, firestore: firestore, googleSignIn: _googleSignIn);
 
   ApplicationBloc applicationBloc = ApplicationBloc(repository: repository);
 

@@ -9,38 +9,34 @@ import 'package:flutter_events/models/serializers.dart';
 import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class ApiProvider {
-  static final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-  static final Firestore firestore = Firestore.instance;
-  static final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
+   final FirebaseAuth firebaseAuth;
+   final Firestore firestore;
+   final FirebaseStorage firebaseStorage;
+   final GoogleSignIn googleSignIn;
 
-  CollectionReference refUser = firestore.collection("user");
-  CollectionReference refEvents = firestore.collection("events");
+   final CollectionReference refUser;
+   final CollectionReference refEvents;
 
-  Future<GoogleSignInAccount> signInWithGoogle()
-  {
+  ApiProvider({
+    @required this.firebaseAuth,
+    @required this.firestore,
+    @required this.firebaseStorage,
+    this.googleSignIn
+  }) : refUser = firestore.collection("user"),
+        refEvents = firestore.collection("events");
 
-    return _getGoogleSignIn().signIn();
+  Future<GoogleSignInAccount> signInWithGoogle() {
+    googleSignIn.signIn();
   }
 
-  GoogleSignIn _getGoogleSignIn()
-  {
-    GoogleSignIn _googleSignIn = GoogleSignIn(
-      scopes: [
-        'email',
-        'https://www.googleapis.com/auth/contacts.readonly',
-      ],
-    );
-
-    return _googleSignIn;
-  }
 
 
   Future<FirebaseUser> signInWithEmailPassword(User user) {
-
     return firebaseAuth.signInWithEmailAndPassword(
         email: user.email, password: user.password);
   }
@@ -113,29 +109,24 @@ class ApiProvider {
     });
   }
 
-  Future<void> saveInterests(List<String> interests, FirebaseUser user) {
+  Future<void> saveInterests(List<String> interests, String  email) {
     Map<String, dynamic> data = {'interests': interests};
-    return refUser.document(user.email).setData(data, merge: true);
+    return refUser.document(email).setData(data, merge: true);
   }
 
-  Future<void> addUserToFirestore(User user) {
-
-    return refUser.document(user.email).setData({
-      'name': user.name,
-      'email': user.email,
-      'phoneNumber': user.phoneNumber
+  Future<bool> addUserToFirestore(User user) {
+    return refUser.document(user.email).get().then((document) {
+      if (!document.exists) {
+        refUser.document(user.email).setData({
+          'name': user.name,
+          'email': user.email,
+          'phoneNumber': user.phoneNumber
+        }).then((_) {
+          return Future.value(true);
+        });
+      } else
+        return Future.value(false);
     });
-
-  /*  refUser.document(user.email).get().then((document){
-      if(!document.exists)
-        {
-
-
-           return true;
-        }
-        else return false;
-    });*/
-
   }
 
   Future<void> addFavorite(Event event, UserFireStore user) {
@@ -156,15 +147,14 @@ class ApiProvider {
   }
 
   Future<UserFireStore> getUserFromFirestore(String email) {
-
-    return refUser.document(email).get().then((snapshots){
+    return refUser.document(email).get().then((snapshots) {
       return standardSerializers.deserializeWith(
           UserFireStore.serializer, snapshots.data);
-    }).catchError((error){
+    }).catchError((error) {
       print(error);
     });
 
-  /*   refUser.document(email).get().then((snapshots) {
+    /*   refUser.document(email).get().then((snapshots) {
       //return standardSerializers.deserializeWith(UserFireStore.serializer, snapshots.data);
        print(snapshots.data);
 
@@ -187,6 +177,4 @@ class ApiProvider {
         .document()
         .setData(standardSerializers.serializeWith(Event.serializer, event));
   }
-
-
 }
