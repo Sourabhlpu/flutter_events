@@ -57,8 +57,9 @@ class LocationTapped extends CreateEventEvents{
 class ImageUploadedEvent extends CreateEventEvents{
 
   final String url;
+  final String fileName;
 
-  ImageUploadedEvent({@required this.url}) : super([url]);
+  ImageUploadedEvent({@required this.url, @required this.fileName}) : super([url, fileName]);
 
   @override
   String toString() => "image uploaded";

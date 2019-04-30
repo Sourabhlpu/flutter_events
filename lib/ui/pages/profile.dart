@@ -61,7 +61,7 @@ class ProfilePageState extends State<ProfilePage> {
             _getHorizontalDivider(),
             HorizontalListWithTitle(
                 title: 'Interests',
-                list: _getInterestsList(_applicationBloc.userFs.interests),
+                list: _getInterestsList(_applicationBloc.getUserFirestore().interests),  //todo remove this and use streams to fetch the list later
                 isListExpandable: true),
             _buildProfileActionList()
           ],

@@ -102,4 +102,9 @@ class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   _shouldShowInterestsPage() {
     return repository.getBoolFromPrefs("showInterestsSelection");
   }
+
+  UserFireStore getUserFirestore()
+  {
+    return repository.getUserFsFromPrefs();
+  }
 }

@@ -55,17 +55,19 @@ import 'package:meta/meta.dart';
 
   class UploadingImage extends CreateEventStates{
     final double percent;
+    final String fileName;
 
-    UploadingImage({@required this.percent}):super([percent]);
+    UploadingImage({@required this.percent, @required this.fileName}):super([percent, fileName]);
     @override
     String toString() => "uploading image";
   }
 
   class ImageUploaded extends CreateEventStates{
 
-    final String fileName;
+    final String imageUrl;
+    final String localFileName;
 
-    ImageUploaded({@required this.fileName}):super([fileName]);
+    ImageUploaded({@required this.imageUrl, @required this.localFileName}):super([imageUrl, localFileName]);
     @override
     String toString() => "image uploaded";
   }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_events/models/events/event.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_events/blocs/application_bloc.dart';
 import 'package:flutter_events/blocs/bloc.dart';
@@ -26,7 +27,6 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
 
   @override
   Stream<CreateEventStates> mapEventToState(CreateEventEvents event) async* {
-    // TODO: implement mapEventToState
 
     if (event is FetchEventType) {
       //todo return a list of event types as streams
@@ -34,24 +34,27 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
       yield ListFetched(eventType: _getEventTypeList());
     }
     if (event is CreateEventPressed) {
-      //todo hit backend to create event
-      yield CreateEventLoading();
 
-      try {
-        repository.createEvent(event.event);
-        yield CreateEventSuccess();
-      } catch (error) {
-        yield CreateEventFailure(error: error.toString());
+      if (_validateEvent(event.event) != null) {
+        yield CreateEventFailure(error: _validateEvent(event.event));
+      } else {
+        yield CreateEventLoading();
+
+        try {
+          repository.createEvent(event.event);
+          yield CreateEventSuccess();
+        } catch (error) {
+          yield CreateEventFailure(error: error.toString());
+        }
       }
     }
     if (event is AddCoverImageTapped) {
-      //todo upload image to the firestore server
 
       try {
         File image = await ImagePicker.pickImage(source: ImageSource.gallery);
-        yield (UploadingImage());
+        yield (UploadingImage(fileName: image.path));
         Stream<StorageTaskEvent> taskEvent = repository.uploadFile(image);
-        _listenToUploadEvents(taskEvent);
+        _listenToUploadEvents(taskEvent, image.path);
       } catch (error) {
         yield CreateEventFailure(error: error.toString());
       }
@@ -75,7 +78,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
     }
 
     if (event is ImageUploadedEvent) {
-      yield ImageUploaded(fileName: event.url);
+      yield ImageUploaded(imageUrl: event.url, localFileName: event.fileName);
     }
 
     if (event is UploadingImageEvent) {
@@ -106,35 +109,24 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
     _eventTypes.removeAt(event.index + 1);
   }
 
-  _updateEventTypeList(int index, EventTypes eventType) {
-    _eventTypes.insert(index, eventType);
-    _eventTypes.removeAt(index + 1);
-  }
-
-  _openLocationPicker() async {
-    try {
-      Place p = await PluginGooglePlacePicker.showAutocomplete(
-          mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
-    } catch (error) {
-      print(error);
-    }
-  }
-
-  _listenToUploadEvents(Stream<StorageTaskEvent> taskEvent) {
+  _listenToUploadEvents(Stream<StorageTaskEvent> taskEvent, String localImagePath) {
     taskEvent.listen((event) async {
       if (event.type == StorageTaskEventType.success) {
-        String imageUrl = await event.snapshot.ref.path;
-        dispatch(ImageUploadedEvent(url: imageUrl));
+        String imageUrl = await event.snapshot.ref.getDownloadURL();
+        dispatch(ImageUploadedEvent(url: imageUrl, fileName: localImagePath));
       }
-
-      /*  if (event.type == StorageTaskEventType.progress) {
-        double percent =
-            (event.snapshot.bytesTransferred / event.snapshot.totalByteCount) * 100 ;
-
-        print(percent);
-
-        dispatch(UploadingImageEvent(percent: percent));
-      }*/
     });
+  }
+
+  _validateEvent(Event event) {
+
+    if(currentState is UploadingImage)
+      return "Please wait while the image is uploading";
+    if (event.eventType.isEmpty)
+      return "Please select event type";
+    else if (event.image == null || event.image.isEmpty)
+      return "Please select an image";
+    else
+      return null;
   }
 }

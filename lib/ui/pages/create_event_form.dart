@@ -1,24 +1,24 @@
 import 'package:built_collection/built_collection.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_events/blocs/bloc.dart';
 import 'package:flutter_events/blocs/create_event_bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/horizontal_list_with_title.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../widgets/primary_btn.dart';
 import 'package:meta/meta.dart';
-import 'package:flutter_events/blocs/bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
+
+import '../widgets/primary_btn.dart';
 
 class CreateEventForm extends StatefulWidget {
   final CreateEventBloc createEventBoc;
 
-  CreateEventForm({@required this.createEventBoc}) {
-    createEventBoc.dispatch(FetchEventType());
-  }
+  CreateEventForm({@required this.createEventBoc});
+
   @override
   _CreateEventFormState createState() => _CreateEventFormState();
 }
@@ -28,9 +28,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   String _imageUrl;
 
-  CreateEventBloc get _createEventBloc => widget.createEventBoc;
-
   final _formKey = GlobalKey<FormState>();
+
   TextEditingController _startDateTextFieldController =
       new TextEditingController();
   TextEditingController _endDateTextFieldController =
@@ -46,102 +45,125 @@ class _CreateEventFormState extends State<CreateEventForm> {
   TextEditingController _descriptionTextFieldController =
       new TextEditingController();
   bool _showEntryFeesField = false;
+  FocusNode focusNodeTitle;
 
-  @override
-  void initState() {}
+  FocusNode focusNodeLocation;
+  FocusNode focusNodeStartDate;
+  FocusNode focusNodeStartTime;
+  FocusNode focusNodeEndDate;
+  FocusNode focusNodeEndTime;
+  FocusNode focusNodeAmount;
+  FocusNode focusNodeDescription;
+  CreateEventBloc get _createEventBloc => widget.createEventBoc;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CreateEventEvents, CreateEventStates>(
+    return BlocListener(
         bloc: _createEventBloc,
-        builder: (BuildContext context, CreateEventStates state) {
+        listener: (context, state) {
           if (state is CreateEventFailure) {
-            _onWidgetDidBuild(() {
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${state.error}'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            });
+            Scaffold.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${state.error}'),
+                backgroundColor: Colors.red,
+              ),
+            );
           }
-
-          return Form(
-            key: _formKey,
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildTitleFormField(),
-                ),
-                _setEventTypeList(state),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildLocationField(state),
-                ),
-                Table(
-                  children: [
-                    TableRow(children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
-                        child: _buildStartDateField('Starts', context),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
-                        child: _buildStartTimeField('', context),
-                      )
-                    ]),
-                    TableRow(children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
-                        child: _buildEndDateField('Ends', context),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 8),
-                        child: _buildEndTimeField('', context),
-                      )
-                    ]),
-                    TableRow(children: [
-                      SwitchListTile(
-                          title: Text(
-                            'Entry fees',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+        },
+        child: BlocBuilder<CreateEventEvents, CreateEventStates>(
+            bloc: _createEventBloc,
+            builder: (BuildContext context, CreateEventStates state) {
+              return Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildTitleFormField(),
+                    ),
+                    _setEventTypeList(state),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildLocationField(state),
+                    ),
+                    Table(
+                      children: [
+                        TableRow(children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: _buildStartDateField('Starts', context),
                           ),
-                          value: _showEntryFeesField,
-                          onChanged: (value) {
-                            setState(() {
-                              _showEntryFeesField = value;
-                            });
-                          }),
-                      _showEntryFeesField
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 0, right: 4),
-                              child: _buildAmountTextField('Rs', context),
-                            )
-                          : Container()
-                    ])
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: _buildStartTimeField('', context),
+                          )
+                        ]),
+                        TableRow(children: [
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: _buildEndDateField('Ends', context),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16, right: 8),
+                            child: _buildEndTimeField('', context),
+                          )
+                        ]),
+                        TableRow(children: [
+                          SwitchListTile(
+                              title: Text(
+                                'Entry fees',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 12),
+                              ),
+                              value: _showEntryFeesField,
+                              onChanged: (value) {
+                                setState(() {
+                                  _showEntryFeesField = value;
+                                });
+                              }),
+                          _showEntryFeesField
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.only(left: 0, right: 4),
+                                  child: _buildAmountTextField('Rs', context),
+                                )
+                              : Container()
+                        ])
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildDescriptionTextField('Description', context),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          _setUploadImageText(state),
+                          _createUploadImageButton(state)
+                        ],
+                      ),
+                    ),
+                    PrimaryGradientButton('Create Event', _createEvent, false)
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _buildDescriptionTextField('Description', context),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      _setUploadImageText(state),
-                      _createUploadImageButton(state)
-                    ],
-                  ),
-                ),
-                PrimaryGradientButton('Create Event', _createEvent, false)
-              ],
-            ),
-          );
-        });
+              );
+            }));
+  }
+
+  @override
+  void initState() {
+    _createEventBloc.dispatch(FetchEventType());
+    focusNodeTitle = FocusNode();
+    focusNodeLocation = FocusNode();
+    focusNodeStartDate = FocusNode();
+    focusNodeEndDate = FocusNode();
+    focusNodeStartTime = FocusNode();
+    focusNodeEndTime = FocusNode();
+    focusNodeAmount = FocusNode();
+    focusNodeDescription = FocusNode();
   }
 
   InputDecoration inputDecoration(String title,
@@ -168,11 +190,18 @@ class _CreateEventFormState extends State<CreateEventForm> {
   _buildTitleFormField() {
     return TextFormField(
       maxLines: 1,
+      maxLength: 50,
+      textCapitalization: TextCapitalization.words,
+      textInputAction: TextInputAction.next,
+      focusNode: focusNodeTitle,
       controller: _titleTextFieldController,
       decoration: inputDecoration('Title'),
       keyboardType: TextInputType.text,
       validator: (value) {
         if (value.isEmpty) return 'Please enter a name for the event';
+      },
+      onFieldSubmitted: (_) {
+        _shiftFocusNode(context, focusNodeTitle, focusNodeLocation);
       },
     );
   }
@@ -186,8 +215,10 @@ class _CreateEventFormState extends State<CreateEventForm> {
         _createEventBloc.dispatch(LocationTapped());
       },
       child: TextFormField(
-        enabled: false,
+        enabled: true,
         controller: _locationFieldController,
+        focusNode: focusNodeLocation,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty) return 'Please select a location';
         },
@@ -196,6 +227,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
               Icons.location_on,
               size: 16,
             )),
+        onFieldSubmitted: (_) {
+          _shiftFocusNode(context, focusNodeLocation, focusNodeStartDate);
+        },
       ),
     );
   }
@@ -215,6 +249,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
       },
       child: TextFormField(
         controller: _startDateTextFieldController,
+        focusNode: focusNodeStartDate,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty) return 'Please enter start date';
         },
@@ -225,6 +261,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
             size: 16,
           ),
         ),
+        onFieldSubmitted: (_) {
+          _shiftFocusNode(context, focusNodeStartDate, focusNodeStartTime);
+        },
       ),
     );
   }
@@ -240,6 +279,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
       },
       child: TextFormField(
         controller: _startTimeTextFieldController,
+        focusNode: focusNodeStartTime,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty) return 'Please enter start time';
         },
@@ -248,6 +289,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
               FontAwesomeIcons.clock,
               size: 16,
             )),
+        onFieldSubmitted: (_) {
+          _shiftFocusNode(context, focusNodeStartTime, focusNodeEndDate);
+        },
       ),
     );
   }
@@ -267,6 +311,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
       },
       child: TextFormField(
         controller: _endDateTextFieldController,
+        focusNode: focusNodeEndDate,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty) return 'Please enter end date';
         },
@@ -275,6 +321,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
               FontAwesomeIcons.calendar,
               size: 16,
             )),
+        onFieldSubmitted: (_) {
+          _shiftFocusNode(context, focusNodeEndDate, focusNodeEndTime);
+        },
       ),
     );
   }
@@ -290,6 +339,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
       },
       child: TextFormField(
         controller: _endTimeTextFieldController,
+        focusNode: focusNodeEndTime,
+        textInputAction: TextInputAction.next,
         validator: (value) {
           if (value.isEmpty) return 'Please enter end time';
         },
@@ -298,6 +349,10 @@ class _CreateEventFormState extends State<CreateEventForm> {
               FontAwesomeIcons.clock,
               size: 16,
             )),
+        onFieldSubmitted: (_) {
+          _shiftFocusNode(context, focusNodeEndTime,
+              _showEntryFeesField ? focusNodeAmount : focusNodeDescription);
+        },
       ),
     );
   }
@@ -306,15 +361,23 @@ class _CreateEventFormState extends State<CreateEventForm> {
     return TextFormField(
       maxLines: 1,
       controller: _entryFeesTextFieldController,
+      focusNode: focusNodeAmount,
       decoration: inputDecoration(title),
+      textInputAction: TextInputAction.next,
+      validator: (value) {
+        if (value.isEmpty) return 'Please enter entry fees';
+      },
     );
   }
 
   _buildDescriptionTextField(String title, BuildContext context) {
     return TextFormField(
-      maxLines: 1,
+      maxLength: 500,
+      maxLines: null,
+      focusNode: focusNodeDescription,
+      textInputAction: TextInputAction.done,
       controller: _descriptionTextFieldController,
-      keyboardType: TextInputType.text,
+      keyboardType: TextInputType.multiline,
       validator: (value) {
         if (value.isEmpty) return 'Please enter a description';
       },
@@ -366,24 +429,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
     }
   }
 
-  _formatTimeOfDay(TimeOfDay timeOfDay) {
-    String period = timeOfDay.period == DayPeriod.am ? "am" : "pm";
-
-    return timeOfDay.hourOfPeriod.toString() +
-        ":" +
-        timeOfDay.minute.toString() +
-        period;
-  }
-
-  void _onWidgetDidBuild(Function callback) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      callback();
-    });
-  }
-
   _createUploadImageButton(CreateEventStates state) {
     if (state is UploadingImage) {
-      print("presentation layer percent ${state.percent}");
       return Padding(
         padding: const EdgeInsets.all(12.0),
         child: Container(
@@ -404,15 +451,17 @@ class _CreateEventFormState extends State<CreateEventForm> {
     }
   }
 
-  _createLinearProgressIndicator(CreateEventStates state) {
-    if (state is UploadingImage) {
-      return LinearProgressIndicator(
-        backgroundColor: Colors.grey,
-        value: state.percent,
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.pinkAccent),
-      );
-    } else
-      return Container();
+  _formatTimeOfDay(TimeOfDay timeOfDay) {
+    String period = timeOfDay.period == DayPeriod.am ? "am" : "pm";
+
+    return timeOfDay.hourOfPeriod.toString() +
+        ":" +
+        timeOfDay.minute.toString() +
+        period;
+  }
+
+  _onEventTypeTapped(int index) {
+    _createEventBloc.dispatch(EventTypePressed(index: index));
   }
 
   _setEventTypeList(CreateEventStates state) {
@@ -448,9 +497,10 @@ class _CreateEventFormState extends State<CreateEventForm> {
     String _text;
 
     if (state is ImageUploaded) {
-      _text = p.basename(state.fileName);
+      _text = p.basename(state.localFileName);
+      _imageUrl = state.imageUrl;
     } else if (state is UploadingImage) {
-      _text = "Uploading...";
+      _text = "uploading...";
     } else {
       _text = "Add Cover Image";
     }
@@ -461,7 +511,23 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _onEventTypeTapped(int index) {
-    _createEventBloc.dispatch(EventTypePressed(index: index));
+  _shiftFocusNode(BuildContext context, FocusNode currentFocusNode,
+      FocusNode nextFocusNode) {
+    currentFocusNode.unfocus();
+    FocusScope.of(context).requestFocus(nextFocusNode);
   }
+
+  @override
+  void dispose() {
+    focusNodeTitle.dispose();
+    focusNodeLocation.dispose();
+    focusNodeStartTime.dispose();
+    focusNodeEndTime.dispose();
+    focusNodeStartDate.dispose();
+    focusNodeEndDate.dispose();
+    focusNodeAmount.dispose();
+    focusNodeDescription.dispose();
+  }
+
+
 }
