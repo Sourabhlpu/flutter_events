@@ -4,13 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc.dart';
+import 'package:flutter_events/blocs/application_bloc/application_bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:google_places_picker/google_places_picker.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';
+import 'package:flutter_events/blocs/create_event_bloc/bloc.dart';
+import 'package:path/path.dart' as p;
 
 class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   final ApplicationBloc applicationBloc;
@@ -23,45 +24,46 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
         assert(repository != null);
 
   @override
-  get initialState => CreateEventInitial();
+  get initialState => CreateEventStates.initialState();
 
   @override
   Stream<CreateEventStates> mapEventToState(CreateEventEvents event) async* {
     if (event is FetchEventType) {
       //todo return a list of event types as streams
 
-      yield ListFetched(eventType: _getEventTypeList());
+      //yield ListFetched(eventType: _getEventTypeList());
+      yield currentState.update(eventTypes: _getEventTypeList(), isError: false);
     }
     if (event is CreateEventPressed) {
-      yield CreateEventLoading();
+      yield CreateEventStates.loading();
 
       await Future.delayed(Duration(seconds: 2));
 
       if (_validateEvent(event.event) != null) {
-        yield CreateEventFailure(error: _validateEvent(event.event));
+        yield currentState.update(error:_validateEvent(event.event), isError: true);
       } else {
         try {
           repository.createEvent(event.event);
-          yield CreateEventSuccess();
+          yield CreateEventStates.createEventSuccess();
         } catch (error) {
-          yield CreateEventFailure(error: error.toString());
+          yield currentState.update(error: _validateEvent(event.event), isError: true);
         }
       }
     }
     if (event is AddCoverImageTapped) {
       try {
         File image = await ImagePicker.pickImage(source: ImageSource.gallery);
-        yield (UploadingImage(fileName: image.path));
+        yield (currentState.update(localImageName: p.basename(image.path), isError: false));
         Stream<StorageTaskEvent> taskEvent = repository.uploadFile(image);
-        _listenToUploadEvents(taskEvent, image.path);
+        _listenToUploadEvents(taskEvent, p.basename(image.path));
       } catch (error) {
-        yield CreateEventFailure(error: error.toString());
+        yield currentState.update(error:error.toString(), isError: true);
       }
     }
 
     if (event is EventTypePressed) {
       _toggleEventSelection(event);
-      yield EventTypeToggled(eventType: List.from(_eventTypes));
+      yield currentState.update(eventTypes: List.from(_eventTypes), isError: false);
       //yield EventTypeTapped();
     }
 
@@ -70,18 +72,18 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
         Place p = await PluginGooglePlacePicker.showAutocomplete(
             mode: PlaceAutocompleteMode.MODE_FULLSCREEN);
 
-        yield LocationSelected(location: p.name);
+        yield currentState.update(location: p.name, isError: false);
       } catch (error) {
-        yield CreateEventFailure(error: error.toString());
+        yield currentState.update(error:error.toString(), isError: true);
       }
     }
 
     if (event is ImageUploadedEvent) {
-      yield ImageUploaded(imageUrl: event.url, localFileName: event.fileName);
+      yield currentState.update(imageUrl: event.url, localImageName: event.fileName, isUploadingImage: false, isError: false);
     }
 
     if (event is UploadingImageEvent) {
-      yield UploadingImage(percent: event.percent);
+      yield currentState.update(isUploadingImage: true, isError: false);
     }
   }
 
@@ -119,7 +121,7 @@ class CreateEventBloc extends Bloc<CreateEventEvents, CreateEventStates> {
   }
 
   _validateEvent(Event event) {
-    if (currentState is UploadingImage)
+    if (currentState.isUploadingImage)
       return "Please wait while the image is uploading";
     if (event.eventType.isEmpty)
       return "Please select event type";

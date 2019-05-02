@@ -2,8 +2,7 @@ import 'package:built_collection/built_collection.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/bloc.dart';
-import 'package:flutter_events/blocs/create_event_bloc.dart';
+import 'package:flutter_events/blocs/create_event_bloc/bloc.dart';
 import 'package:flutter_events/models/event_types.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
@@ -57,12 +56,14 @@ class _CreateEventFormState extends State<CreateEventForm> {
   FocusNode focusNodeDescription;
   CreateEventBloc get _createEventBloc => widget.createEventBoc;
 
+
+
   @override
   Widget build(BuildContext context) {
     return BlocListener(
         bloc: _createEventBloc,
-        listener: (context, state) {
-          if (state is CreateEventFailure) {
+        listener: (context, CreateEventStates state) {
+          if (state.isError) {
             Scaffold.of(context).showSnackBar(
               SnackBar(
                 content: Text('${state.error}'),
@@ -74,88 +75,91 @@ class _CreateEventFormState extends State<CreateEventForm> {
         child: BlocBuilder<CreateEventEvents, CreateEventStates>(
             bloc: _createEventBloc,
             builder: (BuildContext context, CreateEventStates state) {
-              return
-                LoadingInfo(
-                  isLoading: state is CreateEventLoading,
-                  child:  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildTitleFormField(),
-                        ),
-                        _setEventTypeList(state),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildLocationField(state),
-                        ),
-                        Table(
-                          children: [
-                            TableRow(children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16, right: 8),
-                                child: _buildStartDateField('Starts', context),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16, right: 8),
-                                child: _buildStartTimeField('', context),
-                              )
-                            ]),
-                            TableRow(children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16, right: 8),
-                                child: _buildEndDateField('Ends', context),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 16, right: 8),
-                                child: _buildEndTimeField('', context),
-                              )
-                            ]),
-                            TableRow(children: [
-                              SwitchListTile(
-                                  title: Text(
-                                    'Entry fees',
-                                    style:
-                                    TextStyle(color: Colors.grey, fontSize: 12),
-                                  ),
-                                  value: _showEntryFeesField,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _showEntryFeesField = value;
-                                    });
-                                  }),
-                              _showEntryFeesField
-                                  ? Padding(
-                                padding:
-                                const EdgeInsets.only(left: 0, right: 4),
-                                child: _buildAmountTextField('Rs', context),
-                              )
-                                  : Container()
-                            ])
+              return LoadingInfo(
+                isLoading: state.isLoading,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildTitleFormField(),
+                      ),
+                      _setEventTypeList(state),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: _buildLocationField(state),
+                      ),
+                      Table(
+                        children: [
+                          TableRow(children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: _buildStartDateField('Starts', context),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: _buildStartTimeField('', context),
+                            )
+                          ]),
+                          TableRow(children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: _buildEndDateField('Ends', context),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 16, right: 8),
+                              child: _buildEndTimeField('', context),
+                            )
+                          ]),
+                          TableRow(children: [
+                            SwitchListTile(
+                                title: Text(
+                                  'Entry fees',
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 12),
+                                ),
+                                value: _showEntryFeesField,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _showEntryFeesField = value;
+                                  });
+                                }),
+                            _showEntryFeesField
+                                ? Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 0, right: 4),
+                                    child: _buildAmountTextField('Rs', context),
+                                  )
+                                : Container()
+                          ])
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child:
+                            _buildDescriptionTextField('Description', context),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            _setUploadImageText(state),
+                            _createUploadImageButton(state)
                           ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: _buildDescriptionTextField('Description', context),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              _setUploadImageText(state),
-                              _createUploadImageButton(state)
-                            ],
-                          ),
-                        ),
-                        PrimaryGradientButton('Create Event', _createEvent, false)
-                      ],
-                    ),
+                      ),
+                      PrimaryGradientButton('Create Event', _createEvent, false)
+                    ],
                   ),
-                );
-
+                ),
+              );
             }));
   }
 
@@ -213,9 +217,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _buildLocationField(CreateEventStates state) {
-    if (state is LocationSelected) {
+
       _locationFieldController.text = state.location;
-    }
+
     return AddSplash(
       onTap: () {
         _createEventBloc.dispatch(LocationTapped());
@@ -249,6 +253,8 @@ class _CreateEventFormState extends State<CreateEventForm> {
           firstDate: DateTime(2018),
           lastDate: DateTime(2030),
         );
+
+         startDate.millisecondsSinceEpoch;
 
         String _startDate = formatDate(startDate, [dd, " ", M, " ", yyyy]);
         _startDateTextFieldController.text = _startDate;
@@ -436,7 +442,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _createUploadImageButton(CreateEventStates state) {
-    if (state is UploadingImage) {
+    if (state.isUploadingImage) {
       return Padding(
         padding: const EdgeInsets.all(12.0),
         child: Container(
@@ -471,7 +477,16 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _setEventTypeList(CreateEventStates state) {
-    if (state is CreateEventInitial) {
+
+    return HorizontalListWithTitle(
+      title: 'EventType',
+      list: state.eventTypes,
+      isListExpandable: false,
+      onTap: _onEventTypeTapped,
+    );
+
+
+   /* if (state is CreateEventInitial) {
       return Container();
     } else if (state is ListFetched) {
       _eventTypes = state.eventType;
@@ -496,11 +511,13 @@ class _CreateEventFormState extends State<CreateEventForm> {
         isListExpandable: false,
         onTap: _onEventTypeTapped,
       );
-    }
+    }*/
   }
 
+
+
   _setUploadImageText(CreateEventStates state) {
-    String _text;
+   /* String _text;
 
     if (state is ImageUploaded) {
       _text = p.basename(state.localFileName);
@@ -509,10 +526,10 @@ class _CreateEventFormState extends State<CreateEventForm> {
       _text = "uploading...";
     } else {
       _text = "Add Cover Image";
-    }
+    }*/
 
     return Text(
-      _text,
+      state.localImageName,
       style: TextStyle(color: Colors.grey, fontSize: 12),
     );
   }
@@ -525,6 +542,14 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   @override
   void dispose() {
+    _startDateTextFieldController.dispose();
+    _endDateTextFieldController.dispose();
+    _startTimeTextFieldController.dispose();
+    _endTimeTextFieldController.dispose();
+    _titleTextFieldController.dispose();
+    _locationFieldController.dispose();
+    _entryFeesTextFieldController.dispose();
+    _descriptionTextFieldController.dispose();
     focusNodeTitle.dispose();
     focusNodeLocation.dispose();
     focusNodeStartTime.dispose();

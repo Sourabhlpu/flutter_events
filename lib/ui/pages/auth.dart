@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/auth_bloc.dart';
-import 'package:flutter_events/events/auth_events.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
 import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/auth_states.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_events/blocs/auth_bloc/bloc.dart';
+
 
 import '../widgets/loading_info.dart';
 import '../widgets/primary_btn.dart';
@@ -132,6 +130,12 @@ class _AuthenticationState extends State<Authentication>
         obsecurePasswordField = true;
       });
     });
+  }
+
+
+  @override
+  void dispose() {
+    _bloc.dispose();
   }
 
   _buildEmailTextField(String hint) {

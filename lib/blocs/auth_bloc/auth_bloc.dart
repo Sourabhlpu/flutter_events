@@ -2,13 +2,11 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/events/auth_events.dart';
-import 'package:flutter_events/models/serializers.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
+import 'package:flutter_events/blocs/auth_bloc/bloc.dart';
 import 'package:flutter_events/models/users/user.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/auth_states.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:meta/meta.dart';
 
@@ -23,13 +21,6 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
 
   @override
   AuthenticationStates get initialState => InitialState();
-
-  @override
-  void dispose() {
-    super.dispose();
-    signinSubscription.cancel();
-    signupSubscription.cancel();
-  }
 
   @override
   Stream<AuthenticationStates> mapEventToState(
@@ -160,5 +151,13 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
       dispatch(SigninSuccessEvent(
           shouldShowInterests: _shouldShowInterestsScreen(userFirestore)));
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    signinSubscription.cancel();
+    signupSubscription.cancel();
+    googleSinginSubscription.cancel();
   }
 }

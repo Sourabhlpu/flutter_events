@@ -3,15 +3,12 @@ import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/auth_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/events/select_interest_events.dart';
+import 'package:flutter_events/blocs/application_bloc/application_bloc.dart';
+import 'package:flutter_events/blocs/interests_bloc/select_interest_events.dart';
 import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/select_interest_states.dart';
+import 'package:flutter_events/blocs/interests_bloc/select_interest_states.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';

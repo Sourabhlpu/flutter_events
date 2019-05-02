@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart';
-import 'package:flutter_events/blocs/home_bloc.dart';
-import 'package:flutter_events/events/home_events.dart';
+import 'package:flutter_events/blocs/home_bloc/home_bloc.dart';
+import 'package:flutter_events/blocs/home_bloc/home_events.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/icon_white_background.dart';

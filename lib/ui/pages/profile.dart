@@ -1,7 +1,7 @@
 import 'package:built_collection/src/list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
 import 'package:flutter_events/utils/transparent_route.dart';
 import '../widgets/add_splash.dart';
 import 'package:flutter_events/models/users/user_fs.dart';

@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:meta/meta.dart';
 
 class AuthenticationStates extends Equatable {

@@ -2,18 +2,11 @@ import 'dart:async';
 import 'dart:collection';
 import 'package:bloc/bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/events/application_events.dart';
-import 'package:flutter_events/models/events/event.dart';
-import 'package:flutter_events/models/interests/interest.dart';
 import 'package:flutter_events/models/users/user_fs.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/application_states.dart';
-import 'package:flutter_events/utils/app_utils.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
 
 class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   FirebaseUser user;
@@ -112,4 +105,12 @@ class ApplicationBloc extends Bloc<ApplicationEvents, ApplicationStates> {
   {
     return repository.getUserFsFromPrefs();
   }
+
+  @override
+  void dispose() {
+    authStateSubscription.cancel();
+    googleAuthStateSubscription.cancel();
+  }
+
+
 }

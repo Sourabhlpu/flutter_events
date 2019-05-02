@@ -1,9 +1,8 @@
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/create_event_bloc.dart';
-import 'package:flutter_events/delegates/addItem.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
+import 'package:flutter_events/blocs/create_event_bloc/bloc.dart';
 import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/ui/pages/create_event_form.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -58,4 +57,12 @@ class _CreateEventState extends State<CreateEvent> {
     _createEventBloc = CreateEventBloc(
         applicationBloc: _applicationBloc, repository: _appRepository);
   }
+
+  @override
+  void dispose() {
+
+    _createEventBloc.dispose();
+  }
+
+
 }

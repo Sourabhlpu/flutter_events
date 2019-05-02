@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/blocs/home_bloc.dart';
-import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/events/home_events.dart';
-import 'package:flutter_events/models/events/event.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
+import 'package:flutter_events/blocs/home_bloc/bloc.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/home_states.dart';
 import 'package:flutter_events/ui/pages/profile.dart';
 import 'package:flutter_events/ui/widgets/card_item_home.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
@@ -20,8 +15,7 @@ class HomePage extends StatefulWidget {
   final ApplicationBloc applicationBloc;
 
   HomePage({@required this.repository, @required this.applicationBloc})
-      : bloc =
-            HomeBloc(repository: repository) {
+      : bloc = HomeBloc(repository: repository) {
     bloc.dispatch(FetchEventList());
   }
 
@@ -30,7 +24,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  BuildContext _snackbarContext;
   int _currentBottomBarIndex = 0;
 
   HomeBloc get _bloc => widget.bloc;
@@ -48,20 +41,6 @@ class _HomePageState extends State<HomePage> {
             }),
             items: _getBottomNavigationBarItems()),
         body: _getBody());
-  }
-
-  @override
-  void onError(String message) {
-    // TODO: implement onError
-    final snackbar = SnackBar(content: Text(message));
-
-    Scaffold.of(_snackbarContext).showSnackBar(snackbar);
-    print(message);
-  }
-
-  @override
-  void onSuccess(SuccessType type) {
-    // TODO: implement onSuccess
   }
 
   _getBody() {
@@ -130,33 +109,37 @@ class _HomePageState extends State<HomePage> {
         ),
         body: TabBarView(children: [
           Tab(
-            child: BlocBuilder<HomeEvents, HomeState>(
+            child: BlocListener(
                 bloc: _bloc,
-                builder: (BuildContext context, HomeState state) {
-                  if (state is ListLoadingError) {
-                    _onWidgetDidBuild(() {
-                      Scaffold.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${state.error}'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    });
-                  }
+                listener: (context, HomeState state) {
 
-                  return LoadingInfo(
-                    isLoading: state is Loading,
-                    child: state is ListLoaded
-                        ? ListView.builder(
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: state.events.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return CardListItem(state.events[index],
-                                  _onCardItemTapped, index, _bloc);
-                            })
-                        : Container(),
-                  );
-                }),
+                  if (state is ListLoadingError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+
+
+                      return LoadingInfo(
+                        isLoading: state is Loading,
+                        child: state is ListLoaded
+                            ? ListView.builder(
+                                padding: const EdgeInsets.all(8.0),
+                                itemCount: state.events.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return CardListItem(state.events[index],
+                                      _onCardItemTapped, index, _bloc);
+                                })
+                            : Container(),
+                      );
+                    })),
           ),
           Tab(
             child: Center(
@@ -199,11 +182,6 @@ class _HomePageState extends State<HomePage> {
     Navigator.pushNamed(context, '/event_details', arguments: event);
   }
 
-  void _onWidgetDidBuild(Function callback) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      callback();
-    });
-  }
 
   _setCurrentBottomBarIndex(int index) {
     _currentBottomBarIndex = index;

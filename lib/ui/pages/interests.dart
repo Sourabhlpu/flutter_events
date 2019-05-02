@@ -2,14 +2,9 @@ import 'dart:collection';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_events/blocs/application_bloc.dart';
-import 'package:flutter_events/blocs/bloc_provider.dart';
-import 'package:flutter_events/blocs/interests_bloc.dart';
-import 'package:flutter_events/delegates/addItem.dart';
-import 'package:flutter_events/events/select_interest_events.dart';
-import 'package:flutter_events/models/interests/interest.dart';
+import 'package:flutter_events/blocs/application_bloc/bloc.dart';
+import 'package:flutter_events/blocs/interests_bloc/bloc.dart';
 import 'package:flutter_events/repository/app_repository.dart';
-import 'package:flutter_events/states/select_interest_states.dart';
 import 'package:flutter_events/ui/widgets/interest_grid_item.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
 import 'package:flutter_events/ui/widgets/primary_btn.dart';
@@ -107,4 +102,11 @@ class _InterestsState extends State<Interests> {
   void _onInterestTapped(int position) {
     _bloc.dispatch(InterestTapped(index: position));
   }
+
+  @override
+  void dispose() {
+    _bloc.dispose();
+  }
+
+
 }
