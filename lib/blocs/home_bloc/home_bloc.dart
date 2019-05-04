@@ -51,7 +51,7 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
           .asStream()
           .handleError(_handleError)
           .listen((events) {
-        dispatch(ListLoadedEvent(events: events));
+        dispatch(ListLoadedEvent(events: _getRecommendedList(events, _userFs)));
       });
     } else {
       yield ListLoadingError(error: 'No Internet');
@@ -114,4 +114,16 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     dispatch(ListLoadingErrorEvent(error: error.toString()));
   }
 
+  _getRecommendedList(List<Event> events, UserFireStore userFs)
+  {
+
+    events.retainWhere((event) {
+      return event.eventType.any((type) {
+        return userFs.interests.contains(type);
+      });
+    });
+
+    return events;
+
+  }
 }

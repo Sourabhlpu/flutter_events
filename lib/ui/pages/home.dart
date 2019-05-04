@@ -142,20 +142,104 @@ class _HomePageState extends State<HomePage> {
                     })),
           ),
           Tab(
-            child: Center(
-              child: Text('upcoming'),
-            ),
+            child: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+
+                  if (state is ListLoadingError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+
+
+                      return LoadingInfo(
+                        isLoading: state is Loading,
+                        child: state is ListLoaded
+                            ? ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: state.events.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(state.events[index],
+                                  _onCardItemTapped, index, _bloc);
+                            })
+                            : Container(),
+                      );
+                    })),
           ),
           Tab(
-            child: Center(
-              child: Text('popular'),
-            ),
+            child: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+
+                  if (state is ListLoadingError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+
+
+                      return LoadingInfo(
+                        isLoading: state is Loading,
+                        child: state is ListLoaded
+                            ? ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: state.events.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(state.events[index],
+                                  _onCardItemTapped, index, _bloc);
+                            })
+                            : Container(),
+                      );
+                    })),
           ),
           Tab(
-            child: Center(
-              child: Text('all'),
-            ),
-          )
+            child: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+
+                  if (state is ListLoadingError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+
+
+                      return LoadingInfo(
+                        isLoading: state is Loading,
+                        child: state is ListLoaded
+                            ? ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: state.events.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(state.events[index],
+                                  _onCardItemTapped, index, _bloc);
+                            })
+                            : Container(),
+                      );
+                    })),
+          ),
         ]),
       ),
     );

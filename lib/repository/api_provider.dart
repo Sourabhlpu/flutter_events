@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:built_collection/built_collection.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_events/models/interests/interest.dart';
@@ -14,27 +15,25 @@ import 'package:path/path.dart' as p;
 import 'package:google_sign_in/google_sign_in.dart';
 
 class ApiProvider {
-   final FirebaseAuth firebaseAuth;
-   final Firestore firestore;
-   final FirebaseStorage firebaseStorage;
-   final GoogleSignIn googleSignIn;
+  final FirebaseAuth firebaseAuth;
+  final Firestore firestore;
+  final FirebaseStorage firebaseStorage;
+  final GoogleSignIn googleSignIn;
 
-   final CollectionReference refUser;
-   final CollectionReference refEvents;
+  final CollectionReference refUser;
+  final CollectionReference refEvents;
 
-  ApiProvider({
-    @required this.firebaseAuth,
-    @required this.firestore,
-    @required this.firebaseStorage,
-    this.googleSignIn
-  }) : refUser = firestore.collection("user"),
+  ApiProvider(
+      {@required this.firebaseAuth,
+      @required this.firestore,
+      @required this.firebaseStorage,
+      this.googleSignIn})
+      : refUser = firestore.collection("user"),
         refEvents = firestore.collection("events");
 
   Future<GoogleSignInAccount> signInWithGoogle() {
     googleSignIn.signIn();
   }
-
-
 
   Future<FirebaseUser> signInWithEmailPassword(User user) {
     return firebaseAuth.signInWithEmailAndPassword(
@@ -90,7 +89,7 @@ class ApiProvider {
     });*/
   }
 
-  getEventsList(UserFireStore userFs) {
+  Future<List<Event>> getEventsList(UserFireStore userFs) {
     List<Event> events = List<Event>();
 
     return refEvents.getDocuments().then((querySnapshot) {
@@ -109,7 +108,23 @@ class ApiProvider {
     });
   }
 
-  Future<void> saveInterests(List<String> interests, String  email) {
+  getRecommendedEventList(UserFireStore userFs) async {
+    List<Event> events;
+
+    getEventsList(userFs).then((list) {
+      events = list;
+
+      events.retainWhere((event) {
+        return event.eventType.any((type) {
+          return userFs.interests.contains(type);
+        });
+      });
+
+      return events;
+    });
+  }
+
+  Future<void> saveInterests(List<String> interests, String email) {
     Map<String, dynamic> data = {'interests': interests};
     return refUser.document(email).setData(data, merge: true);
   }
