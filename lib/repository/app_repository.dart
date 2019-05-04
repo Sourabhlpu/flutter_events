@@ -20,6 +20,7 @@ class AppRepository {
   final FirebaseAuth firebaseAuth;
   final Firestore firestore;
   final GoogleSignIn googleSignIn;
+  final FirebaseStorage firebaseStorage;
 
   CollectionReference refUser;
   CollectionReference refEvents;
@@ -28,18 +29,22 @@ class AppRepository {
 
   final ApiProvider apiProvider;
 
-  AppRepository({@required this.firebaseAuth, @required this.firestore, @required this.googleSignIn})
+  AppRepository(
+      {@required this.firebaseAuth,
+      @required this.firestore,
+      @required this.googleSignIn,
+      @required this.firebaseStorage})
       : refUser = firestore.collection("user"),
         refEvents = firestore.collection("events"),
         apiProvider = ApiProvider(
-          firebaseAuth: firebaseAuth,
-          firestore: firestore,
-          googleSignIn: googleSignIn) {
+            firebaseAuth: firebaseAuth,
+            firestore: firestore,
+            googleSignIn: googleSignIn,
+            firebaseStorage: firebaseStorage) {
     _initPrefs();
   }
 
   bool getBoolFromPrefs(String key) {
-
     return prefs.getBool(key);
   }
 
@@ -50,13 +55,11 @@ class AppRepository {
       prefs.setBool('shouldShowIntro', true);
     }
 
-    if(prefs.get('showInterestsSelection') == null) {
-
+    if (prefs.get('showInterestsSelection') == null) {
       prefs.setBool('showInterestsSelection', false);
     }
 
-    if(prefs.get("isGoogleAuthenticated") == null) {
-
+    if (prefs.get("isGoogleAuthenticated") == null) {
       prefs.setBool("isGoogleAuthenticated", false);
     }
   }
@@ -65,31 +68,27 @@ class AppRepository {
     prefs.setBool(key, value);
   }
 
-  void setPrefString(String key, String value){
+  void setPrefString(String key, String value) {
     prefs.setString("userFirestore", value);
   }
 
-  void saveUserFsToPrefs(UserFireStore userFs)
-  {
-
-    Map userFsMap = standardSerializers.serializeWith(
-        UserFireStore.serializer, userFs);
+  void saveUserFsToPrefs(UserFireStore userFs) {
+    Map userFsMap =
+        standardSerializers.serializeWith(UserFireStore.serializer, userFs);
 
     String userFsString = json.encode(userFsMap);
 
     prefs.setString('userFs', userFsString);
-
   }
 
-  UserFireStore getUserFsFromPrefs()
-  {
+  UserFireStore getUserFsFromPrefs() {
     String userFs = prefs.get('userFs');
 
     Map userFsMap = json.decode(userFs);
 
-    return standardSerializers.deserializeWith(UserFireStore.serializer, userFsMap);
+    return standardSerializers.deserializeWith(
+        UserFireStore.serializer, userFsMap);
   }
-
 
   Future<FirebaseUser> signInWithEmailPassword(User user) =>
       apiProvider.signInWithEmailPassword(user);
@@ -123,6 +122,6 @@ class AppRepository {
 
   Future<void> createEvent(Event event) => apiProvider.createEvent(event);
 
-  Future<GoogleSignInAccount> signinWithGoogle() => apiProvider.signInWithGoogle();
+  Future<GoogleSignInAccount> signinWithGoogle() =>
+      apiProvider.signInWithGoogle();
 }
-

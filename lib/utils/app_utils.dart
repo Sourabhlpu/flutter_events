@@ -1,4 +1,6 @@
 import 'package:connectivity/connectivity.dart';
+import 'package:date_format/date_format.dart';
+import 'package:flutter/material.dart';
 
 class AppUtils{
   static Future<bool> checkNetworkAvailability() async {
@@ -12,6 +14,25 @@ class AppUtils{
       // I am connected to a wifi network.
       return false;
     }
+  }
+
+
+  static String formatDates(DateTime date) {
+
+    return formatDate(date, [dd, " ", M, " ", yyyy]);
+  }
+
+  static String formatTime(TimeOfDay time) {
+    String period = time.period == DayPeriod.am ? "am" : "pm";
+
+    return time.hourOfPeriod.toString() + ":" + time.minute.toString() + period;
+  }
+
+  static int getDateInEpoch(DateTime date, TimeOfDay time)
+  {
+    DateTime dateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+
+    return dateTime.millisecondsSinceEpoch;
   }
   
   

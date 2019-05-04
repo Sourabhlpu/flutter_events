@@ -18,8 +18,8 @@ class CardListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime _date = DateTime.fromMillisecondsSinceEpoch(
-        num.parse(_event.date) * 1000,
-        isUtc: true);
+        num.parse(_event.startDate),
+        isUtc: false);
     var date = formatDate(_date, [d, '\n', M]);
     // TODO: implement build
     return Card(

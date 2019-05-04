@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/application_bloc/bloc.dart';
@@ -19,6 +20,7 @@ void main() {
   /* debugPaintSizeEnabled=true;*/
   final Firestore firestore = Firestore.instance;
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  final FirebaseStorage firebaseStorage = FirebaseStorage.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: [
       'email',
@@ -26,8 +28,11 @@ void main() {
     ],
   );
 
-  AppRepository repository =
-      AppRepository(firebaseAuth: firebaseAuth, firestore: firestore, googleSignIn: _googleSignIn);
+  AppRepository repository = AppRepository(
+      firebaseAuth: firebaseAuth,
+      firestore: firestore,
+      googleSignIn: _googleSignIn,
+      firebaseStorage: firebaseStorage);
 
   ApplicationBloc applicationBloc = ApplicationBloc(repository: repository);
 
@@ -82,7 +87,10 @@ class MyApp extends StatelessWidget {
           return null;
         },
         routes: {
-          '/auth': (context) => Authentication(repository: repository, applicationBloc: bloc,),
+          '/auth': (context) => Authentication(
+                repository: repository,
+                applicationBloc: bloc,
+              ),
           '/interests': (context) =>
               Interests(repository: repository, applicationBloc: bloc),
           '/home': (context) => HomePage(
@@ -102,7 +110,10 @@ class MyApp extends StatelessWidget {
           if (state.showIntro)
             return IntroPage();
           else
-            return Authentication(repository: repository, applicationBloc: bloc,);
+            return Authentication(
+              repository: repository,
+              applicationBloc: bloc,
+            );
         }
 
         if (state is UserAuthenticated) {

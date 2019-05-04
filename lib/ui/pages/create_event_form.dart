@@ -1,16 +1,12 @@
-import 'package:built_collection/built_collection.dart';
-import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_events/blocs/create_event_bloc/bloc.dart';
-import 'package:flutter_events/models/event_types.dart';
-import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/horizontal_list_with_title.dart';
 import 'package:flutter_events/ui/widgets/loading_info.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
+
 
 import '../widgets/primary_btn.dart';
 
@@ -24,10 +20,6 @@ class CreateEventForm extends StatefulWidget {
 }
 
 class _CreateEventFormState extends State<CreateEventForm> {
-  List<EventTypes> _eventTypes;
-
-  String _imageUrl;
-
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController _startDateTextFieldController =
@@ -56,8 +48,6 @@ class _CreateEventFormState extends State<CreateEventForm> {
   FocusNode focusNodeDescription;
   CreateEventBloc get _createEventBloc => widget.createEventBoc;
 
-
-
   @override
   Widget build(BuildContext context) {
     return BlocListener(
@@ -71,6 +61,11 @@ class _CreateEventFormState extends State<CreateEventForm> {
               ),
             );
           }
+
+          if(state.createEvenSuccess)
+            {
+              Navigator.pop(context, 'Event created sussessfully');
+            }
         },
         child: BlocBuilder<CreateEventEvents, CreateEventStates>(
             bloc: _createEventBloc,
@@ -96,24 +91,25 @@ class _CreateEventFormState extends State<CreateEventForm> {
                             Padding(
                               padding:
                                   const EdgeInsets.only(left: 16, right: 8),
-                              child: _buildStartDateField('Starts', context),
+                              child: _buildStartDateField(
+                                  'Starts', context, state),
                             ),
                             Padding(
                               padding:
                                   const EdgeInsets.only(left: 16, right: 8),
-                              child: _buildStartTimeField('', context),
+                              child: _buildStartTimeField('', context, state),
                             )
                           ]),
                           TableRow(children: [
                             Padding(
                               padding:
                                   const EdgeInsets.only(left: 16, right: 8),
-                              child: _buildEndDateField('Ends', context),
+                              child: _buildEndDateField('Ends', context, state),
                             ),
                             Padding(
                               padding:
                                   const EdgeInsets.only(left: 16, right: 8),
-                              child: _buildEndTimeField('', context),
+                              child: _buildEndTimeField('', context, state),
                             )
                           ]),
                           TableRow(children: [
@@ -217,8 +213,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
   }
 
   _buildLocationField(CreateEventStates state) {
-
-      _locationFieldController.text = state.location;
+    _locationFieldController.text = state.location;
 
     return AddSplash(
       onTap: () {
@@ -244,7 +239,10 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _buildStartDateField(String title, BuildContext context) {
+  _buildStartDateField(
+      String title, BuildContext context, CreateEventStates state) {
+    _startDateTextFieldController.text = state.startDate;
+
     return AddSplash(
       onTap: () async {
         DateTime startDate = await showDatePicker(
@@ -254,10 +252,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
           lastDate: DateTime(2030),
         );
 
-         startDate.millisecondsSinceEpoch;
-
-        String _startDate = formatDate(startDate, [dd, " ", M, " ", yyyy]);
-        _startDateTextFieldController.text = _startDate;
+        _createEventBloc.dispatch(StartDateSelected(startDate: startDate));
       },
       child: TextFormField(
         controller: _startDateTextFieldController,
@@ -280,14 +275,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _buildStartTimeField(String title, BuildContext context) {
+  _buildStartTimeField(
+      String title, BuildContext context, CreateEventStates state) {
+    _startTimeTextFieldController.text = state.startTime;
     return AddSplash(
       onTap: () async {
         TimeOfDay timeStart = await showTimePicker(
             context: context, initialTime: TimeOfDay.now());
 
-        String _startTime = _formatTimeOfDay(timeStart);
-        _startTimeTextFieldController.text = _startTime;
+        _createEventBloc.dispatch(StartTimeSelected(startTime: timeStart));
       },
       child: TextFormField(
         controller: _startTimeTextFieldController,
@@ -308,7 +304,9 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _buildEndDateField(String title, BuildContext context) {
+  _buildEndDateField(
+      String title, BuildContext context, CreateEventStates state) {
+    _endDateTextFieldController.text = state.endDate;
     return AddSplash(
       onTap: () async {
         DateTime endDate = await showDatePicker(
@@ -318,8 +316,7 @@ class _CreateEventFormState extends State<CreateEventForm> {
           lastDate: DateTime(2030),
         );
 
-        String _endDate = formatDate(endDate, [dd, " ", M, " ", yyyy]);
-        _endDateTextFieldController.text = _endDate;
+        _createEventBloc.dispatch(EndDateSelected(endDate: endDate));
       },
       child: TextFormField(
         controller: _endDateTextFieldController,
@@ -340,14 +337,15 @@ class _CreateEventFormState extends State<CreateEventForm> {
     );
   }
 
-  _buildEndTimeField(String title, BuildContext context) {
+  _buildEndTimeField(
+      String title, BuildContext context, CreateEventStates state) {
+    _endTimeTextFieldController.text = state.endTime;
     return AddSplash(
       onTap: () async {
         TimeOfDay endTime = await showTimePicker(
             context: context, initialTime: TimeOfDay.now());
 
-        String _endTime = _formatTimeOfDay(endTime);
-        _endTimeTextFieldController.text = _endTime;
+        _createEventBloc.dispatch(EndtTimeSelected(endTime: endTime));
       },
       child: TextFormField(
         controller: _endTimeTextFieldController,
@@ -399,45 +397,13 @@ class _CreateEventFormState extends State<CreateEventForm> {
 
   _createEvent() {
     if (_formKey.currentState.validate()) {
-      String title = _titleTextFieldController.text;
+      _createEventBloc.dispatch(
+          CreateEventPressed(
+          title: _titleTextFieldController.text,
+          location: _locationFieldController.text,
+          fees: _entryFeesTextFieldController.text,
+          description: _descriptionTextFieldController.text));
 
-      List<String> selectedEventTypes = _eventTypes
-          .where((eventType) => eventType.isSelected)
-          .toList()
-          .map((eventType) => eventType.interestName)
-          .toList();
-
-      String location = _locationFieldController.text;
-
-      String startDate = _startDateTextFieldController.text;
-
-      String startTime = _startTimeTextFieldController.text;
-
-      String endDate = _endDateTextFieldController.text;
-
-      String endTime = _endTimeTextFieldController.text;
-
-      String fees = '';
-
-      if (_showEntryFeesField) {
-        fees = _endTimeTextFieldController.text;
-      }
-
-      String description = _descriptionTextFieldController.text;
-
-      Event event = Event((b) => b
-        ..title = title
-        ..eventType = BuiltList<String>.from(selectedEventTypes).toBuilder()
-        ..location = location
-        ..startDate = startDate
-        ..startTime = startTime
-        ..endDate = endDate
-        ..endTime = endTime
-        ..entryFees = fees
-        ..about = description
-        ..image = _imageUrl);
-
-      _createEventBloc.dispatch(CreateEventPressed(event: event));
     }
   }
 
@@ -463,71 +429,20 @@ class _CreateEventFormState extends State<CreateEventForm> {
     }
   }
 
-  _formatTimeOfDay(TimeOfDay timeOfDay) {
-    String period = timeOfDay.period == DayPeriod.am ? "am" : "pm";
-
-    return timeOfDay.hourOfPeriod.toString() +
-        ":" +
-        timeOfDay.minute.toString() +
-        period;
-  }
-
   _onEventTypeTapped(int index) {
     _createEventBloc.dispatch(EventTypePressed(index: index));
   }
 
   _setEventTypeList(CreateEventStates state) {
-
     return HorizontalListWithTitle(
       title: 'EventType',
       list: state.eventTypes,
       isListExpandable: false,
       onTap: _onEventTypeTapped,
     );
-
-
-   /* if (state is CreateEventInitial) {
-      return Container();
-    } else if (state is ListFetched) {
-      _eventTypes = state.eventType;
-      return HorizontalListWithTitle(
-        title: 'Event Type',
-        list: state.eventType,
-        isListExpandable: false,
-        onTap: _onEventTypeTapped,
-      );
-    } else if (state is EventTypeToggled) {
-      _eventTypes = state.eventType;
-      return HorizontalListWithTitle(
-        title: 'Event Type',
-        list: state.eventType,
-        isListExpandable: false,
-        onTap: _onEventTypeTapped,
-      );
-    } else if (_eventTypes != null && _eventTypes.isNotEmpty) {
-      return HorizontalListWithTitle(
-        title: 'EventType',
-        list: _eventTypes,
-        isListExpandable: false,
-        onTap: _onEventTypeTapped,
-      );
-    }*/
   }
 
-
-
   _setUploadImageText(CreateEventStates state) {
-   /* String _text;
-
-    if (state is ImageUploaded) {
-      _text = p.basename(state.localFileName);
-      _imageUrl = state.imageUrl;
-    } else if (state is UploadingImage) {
-      _text = "uploading...";
-    } else {
-      _text = "Add Cover Image";
-    }*/
-
     return Text(
       state.localImageName,
       style: TextStyle(color: Colors.grey, fontSize: 12),

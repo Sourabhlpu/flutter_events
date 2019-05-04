@@ -168,7 +168,11 @@ class ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  _openCreateEventPage(BuildContext context) {
-    Navigator.pushNamed(context, '/create_event');
+  _openCreateEventPage(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/create_event');
+
+    if(result != null)
+    Scaffold.of(context)
+      ..removeCurrentSnackBar()..showSnackBar(SnackBar(content: Text('$result')));
   }
 }
