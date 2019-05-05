@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 
   HomePage({@required this.repository, @required this.applicationBloc})
       : bloc = HomeBloc(repository: repository) {
-    bloc.dispatch(FetchEventList());
+
   }
 
   @override
@@ -27,6 +27,15 @@ class _HomePageState extends State<HomePage> {
   int _currentBottomBarIndex = 0;
 
   HomeBloc get _bloc => widget.bloc;
+
+
+  @override
+  void initState() {
+    _bloc.dispatch(FetchRecommendedList());
+    _bloc.dispatch(FetchUpcomingList());
+    _bloc.dispatch(FetchPopularList());
+    _bloc.dispatch(FetchEventList());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,13 +116,36 @@ class _HomePageState extends State<HomePage> {
             unselectedLabelColor: Colors.grey,
           ),
         ),
-        body: TabBarView(children: [
+        body: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+                  if (state.isError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+                      return TabBarView(
+                        children: <Widget>[
+                          _getTab(state.loadingRecommended, state.recommended),
+                          _getTab(state.loadingUpcoming, state.upcoming),
+                          _getTab(state.loadingPopular, state.popular),
+                          _getTab(state.loadAll, state.all)
+                        ],
+                      );
+                    }))
+            /*TabBarView(children: [
           Tab(
             child: BlocListener(
                 bloc: _bloc,
                 listener: (context, HomeState state) {
-
-                  if (state is ListLoadingError) {
+                  if (state.isError) {
                     Scaffold.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${state.error}'),
@@ -125,16 +157,72 @@ class _HomePageState extends State<HomePage> {
                 child: BlocBuilder<HomeEvents, HomeState>(
                     bloc: _bloc,
                     builder: (BuildContext context, HomeState state) {
-
-
                       return LoadingInfo(
-                        isLoading: state is Loading,
-                        child: state is ListLoaded
+                          isLoading: state.loadingType ==
+                              LoadingType.loadingRecommended,
+                          child: ListView.builder(
+                              padding: const EdgeInsets.all(8.0),
+                              itemCount: state.recommended.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return CardListItem(state.recommended[index],
+                                    _onCardItemTapped, index, _bloc);
+                              }));
+                    })),
+          ),
+          Tab(
+            child: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+                  if (state.isError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+                      return LoadingInfo(
+                        isLoading:
+                            state.loadingType == LoadingType.loadingUpcoming,
+                        child: ListView.builder(
+                            padding: const EdgeInsets.all(8.0),
+                            itemCount: state.upcoming.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return CardListItem(state.upcoming[index],
+                                  _onCardItemTapped, index, _bloc);
+                            }),
+                      );
+                    })),
+          ),
+          Tab(
+            child: BlocListener(
+                bloc: _bloc,
+                listener: (context, HomeState state) {
+                  if (state.isError) {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${state.error}'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                },
+                child: BlocBuilder<HomeEvents, HomeState>(
+                    bloc: _bloc,
+                    builder: (BuildContext context, HomeState state) {
+                      return LoadingInfo(
+                        isLoading:
+                            state.loadingType == LoadingType.loadingUpcoming,
+                        child: state.loadingType == LoadingType.loadingPopular
                             ? ListView.builder(
                                 padding: const EdgeInsets.all(8.0),
-                                itemCount: state.events.length,
+                                itemCount: state.popular.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  return CardListItem(state.events[index],
+                                  return CardListItem(state.popular[index],
                                       _onCardItemTapped, index, _bloc);
                                 })
                             : Container(),
@@ -145,8 +233,7 @@ class _HomePageState extends State<HomePage> {
             child: BlocListener(
                 bloc: _bloc,
                 listener: (context, HomeState state) {
-
-                  if (state is ListLoadingError) {
+                  if (state.isError) {
                     Scaffold.of(context).showSnackBar(
                       SnackBar(
                         content: Text('${state.error}'),
@@ -158,90 +245,35 @@ class _HomePageState extends State<HomePage> {
                 child: BlocBuilder<HomeEvents, HomeState>(
                     bloc: _bloc,
                     builder: (BuildContext context, HomeState state) {
-
-
                       return LoadingInfo(
-                        isLoading: state is Loading,
-                        child: state is ListLoaded
-                            ? ListView.builder(
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: state.events.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return CardListItem(state.events[index],
-                                  _onCardItemTapped, index, _bloc);
-                            })
-                            : Container(),
-                      );
+                          isLoading:
+                              state.loadingType == LoadingType.loadingAll,
+                          child: ListView.builder(
+                              padding: const EdgeInsets.all(8.0),
+                              itemCount: state.all.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return CardListItem(state.all[index],
+                                    _onCardItemTapped, index, _bloc);
+                              }));
                     })),
           ),
-          Tab(
-            child: BlocListener(
-                bloc: _bloc,
-                listener: (context, HomeState state) {
-
-                  if (state is ListLoadingError) {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${state.error}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: BlocBuilder<HomeEvents, HomeState>(
-                    bloc: _bloc,
-                    builder: (BuildContext context, HomeState state) {
-
-
-                      return LoadingInfo(
-                        isLoading: state is Loading,
-                        child: state is ListLoaded
-                            ? ListView.builder(
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: state.events.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return CardListItem(state.events[index],
-                                  _onCardItemTapped, index, _bloc);
-                            })
-                            : Container(),
-                      );
-                    })),
-          ),
-          Tab(
-            child: BlocListener(
-                bloc: _bloc,
-                listener: (context, HomeState state) {
-
-                  if (state is ListLoadingError) {
-                    Scaffold.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${state.error}'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: BlocBuilder<HomeEvents, HomeState>(
-                    bloc: _bloc,
-                    builder: (BuildContext context, HomeState state) {
-
-
-                      return LoadingInfo(
-                        isLoading: state is Loading,
-                        child: state is ListLoaded
-                            ? ListView.builder(
-                            padding: const EdgeInsets.all(8.0),
-                            itemCount: state.events.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return CardListItem(state.events[index],
-                                  _onCardItemTapped, index, _bloc);
-                            })
-                            : Container(),
-                      );
-                    })),
-          ),
-        ]),
+        ])*/
+            ,
       ),
+    );
+  }
+
+  Tab _getTab(bool isLoading, List<Event> events) {
+    return Tab(
+      child: LoadingInfo(
+          isLoading: isLoading,
+          child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: events.length,
+              itemBuilder: (BuildContext context, int index) {
+                return CardListItem(
+                    events[index], _onCardItemTapped, index, _bloc);
+              })),
     );
   }
 
@@ -265,7 +297,6 @@ class _HomePageState extends State<HomePage> {
   _onCardItemTapped(int index, Event event, BuildContext context) {
     Navigator.pushNamed(context, '/event_details', arguments: event);
   }
-
 
   _setCurrentBottomBarIndex(int index) {
     _currentBottomBarIndex = index;

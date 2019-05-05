@@ -10,14 +10,67 @@ class FetchEventList extends HomeEvents {
 
 
   @override
-  String toString() => "Fetch home events list";
+  String toString() => "Fetch all events list";
 }
+
+class FetchRecommendedList extends HomeEvents{
+
+
+  @override
+  String toString() => "Fetch recommended list";
+}
+
+class FetchUpcomingList extends HomeEvents{
+
+
+  @override
+  String toString() => "Fetch upcoming list";
+}
+
+class FetchPopularList extends HomeEvents{
+
+
+  @override
+  String toString() => "Fetch popular list";
+}
+
+
 
 class ListLoadedEvent extends HomeEvents{
 
   final List<Event> events;
 
   ListLoadedEvent({this.events}) : super([events]);
+
+  @override
+  String toString() => "List fetched";
+}
+
+class RecommendedListLoadedEvent extends HomeEvents{
+
+  final List<Event> events;
+
+  RecommendedListLoadedEvent({this.events}) : super([events]);
+
+  @override
+  String toString() => "List fetched";
+}
+
+class UpcomingListLoadedEvent extends HomeEvents{
+
+  final List<Event> events;
+
+  UpcomingListLoadedEvent({this.events}) : super([events]);
+
+  @override
+  String toString() => "List fetched";
+}
+
+class PopularListLoadedEvent extends HomeEvents{
+
+  final List<Event> events;
+
+  PopularListLoadedEvent({this.events}) : super([events]);
 
   @override
   String toString() => "List fetched";

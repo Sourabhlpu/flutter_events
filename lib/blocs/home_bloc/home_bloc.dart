@@ -14,47 +14,109 @@ import 'package:rxdart/rxdart.dart';
 class HomeBloc extends Bloc<HomeEvents, HomeState> {
   AppRepository repository;
   UserFireStore _userFs;
-  StreamSubscription streamSubscription;
+  StreamSubscription streamSubscriptionUpcoming;
+  StreamSubscription streamSubscriptionRecommended;
+  StreamSubscription streamSubscriptionAll;
 
   HomeBloc({@required this.repository})
       : _userFs = repository.getUserFsFromPrefs();
 
   @override
-  HomeState get initialState => HomeStateUninitialized();
+  HomeState get initialState => HomeState.initialState();
 
   @override
   Stream<HomeState> mapEventToState(HomeEvents event) async* {
     if (event is FetchEventList) {
-      yield* _fetchEvents();
+      yield* _fetchAllEvents();
+    }
+
+    if (event is FetchRecommendedList) {
+      yield* _fetchRecommendedEvents();
+    }
+
+    if (event is FetchUpcomingList) {
+      yield* _fetchUpcomingList();
     }
 
     if (event is ListLoadedEvent) {
-      yield ListLoaded(events: event.events);
+      yield currentState.update(all: event.events, loadAll: false);
     }
 
-    if (event is ListLoadingErrorEvent) {
-      yield ListLoadingError(error: event.error);
+    if (event is RecommendedListLoadedEvent) {
+      yield currentState.update(
+          recommended: event.events, loadingRecommended: false);
+    }
+
+    if (event is UpcomingListLoadedEvent) {
+      yield currentState.update(
+          upcoming: event.events, loadingUpcoming: false);
+    }
+
+    if (event is PopularListLoadedEvent) {
+      yield currentState.update(
+          popular: event.events, loadingPopular: false);
     }
 
     if (event is FavoriteButtonTapped) {
       yield* _manageFavorite(event.index);
     }
+
+    if (event is ListLoadingErrorEvent) {
+      yield currentState.update(isError: true, error: event.error);
+    }
   }
 
-  Stream<HomeState> _fetchEvents() async* {
-    yield Loading();
+  Stream<HomeState> _fetchAllEvents() async* {
+    yield currentState.update(
+        loadAll: true);
     if (await AppUtils.checkNetworkAvailability()) {
-      streamSubscription?.cancel();
+      streamSubscriptionAll?.cancel();
 
-      streamSubscription = repository
+      streamSubscriptionAll = repository
           .getEventsList(_userFs)
           .asStream()
           .handleError(_handleError)
           .listen((events) {
-        dispatch(ListLoadedEvent(events: _getRecommendedList(events, _userFs)));
+      dispatch(ListLoadedEvent(events: events));
       });
     } else {
-      yield ListLoadingError(error: 'No Internet');
+      yield currentState.update(isError: true, error: 'No Internet');
+    }
+  }
+
+  Stream<HomeState> _fetchRecommendedEvents() async* {
+    yield currentState.update(loadingRecommended: true);
+    if (await AppUtils.checkNetworkAvailability()) {
+      streamSubscriptionRecommended?.cancel();
+
+      streamSubscriptionRecommended = repository
+          .getEventsList(_userFs)
+          .asStream()
+          .handleError(_handleError)
+          .listen((events) {
+        dispatch(RecommendedListLoadedEvent(
+            events: _getRecommendedList(events, _userFs)));
+      });
+    } else {
+      yield currentState.update(isError: true, error: 'No Internet');
+    }
+  }
+
+  Stream<HomeState> _fetchUpcomingList() async* {
+    yield currentState.update(loadingUpcoming:true);
+
+    if (await AppUtils.checkNetworkAvailability()) {
+      streamSubscriptionUpcoming?.cancel();
+
+      streamSubscriptionUpcoming = repository
+          .getUpcomingEvents(_userFs)
+          .asStream()
+          .handleError(_handleError)
+          .listen((events) {
+        dispatch(UpcomingListLoadedEvent(events: events));
+      });
+    } else {
+      yield currentState.update(isError: true, error: 'No Internet');
     }
   }
 
@@ -86,13 +148,13 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
   }
 
   List<Event> _getEventList() {
-    List<Event> events = [];
+    /*List<Event> events = [];
 
     if (currentState is ListLoaded) {
       events = (currentState as ListLoaded).events;
     }
 
-    return events;
+    return events;*/
   }
 
   // as objects from built value gen are immutable, we create a new object with the
@@ -114,9 +176,7 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     dispatch(ListLoadingErrorEvent(error: error.toString()));
   }
 
-  _getRecommendedList(List<Event> events, UserFireStore userFs)
-  {
-
+  _getRecommendedList(List<Event> events, UserFireStore userFs) {
     events.retainWhere((event) {
       return event.eventType.any((type) {
         return userFs.interests.contains(type);
@@ -124,6 +184,5 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     });
 
     return events;
-
   }
 }

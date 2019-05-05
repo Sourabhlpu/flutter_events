@@ -89,7 +89,7 @@ class ApiProvider {
     });*/
   }
 
-  Future<List<Event>> getEventsList(UserFireStore userFs) {
+  getEventsList(UserFireStore userFs) {
     List<Event> events = List<Event>();
 
     return refEvents.getDocuments().then((querySnapshot) {
@@ -108,21 +108,28 @@ class ApiProvider {
     });
   }
 
-  getRecommendedEventList(UserFireStore userFs) async {
-    List<Event> events;
+  getUpcomingEventList(UserFireStore userFs) {
 
-    getEventsList(userFs).then((list) {
-      events = list;
+    List<Event> events = List<Event>();
 
-      events.retainWhere((event) {
-        return event.eventType.any((type) {
-          return userFs.interests.contains(type);
-        });
+    return refEvents.orderBy("startDate").getDocuments().then((querySnapshot) {
+      querySnapshot.documents.forEach((snapshot) {
+        Map<String, dynamic> map = {'id': snapshot.documentID};
+        snapshot.data.addAll(map);
+
+        if (userFs.favorites != null &&
+            userFs.favorites.contains(snapshot.documentID))
+          snapshot.data['isFavorite'] = true;
+        Event event = standardSerializers.deserializeWith(
+            Event.serializer, snapshot.data);
+        events.add(event);
       });
-
       return events;
     });
   }
+
+
+
 
   Future<void> saveInterests(List<String> interests, String email) {
     Map<String, dynamic> data = {'interests': interests};

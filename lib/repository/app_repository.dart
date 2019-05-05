@@ -108,6 +108,9 @@ class AppRepository {
   Future<List<Event>> getEventsList(UserFireStore userFs) =>
       apiProvider.getEventsList(userFs);
 
+  Future<List<Event>> getUpcomingEvents(UserFireStore userFs) =>
+      apiProvider.getUpcomingEventList(userFs);
+
   Future<void> addFavorite(Event event, UserFireStore user) =>
       apiProvider.addFavorite(event, user);
 
