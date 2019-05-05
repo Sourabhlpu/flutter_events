@@ -9,11 +9,12 @@ import 'package:flutter_events/ui/widgets/icon_white_background.dart';
 class CardListItem extends StatelessWidget {
   Event _event;
   final Function _onCardTapped;
+  final int _tabIndex;
   final int _index;
   final HomeBloc _bloc;
 
 
-  CardListItem(this._event, this._onCardTapped, this._index, this._bloc);
+  CardListItem(this._event, this._onCardTapped, this._tabIndex, this._index, this._bloc);
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,7 @@ class CardListItem extends StatelessWidget {
                         ? IconWhiteBackground(Icons.favorite)
                         : IconWhiteBackground(Icons.favorite_border),
                     onTap: () {
-                      _addFavorite(_index);
+                      _addFavorite(_index, );
                     },
                   ),
                 )
@@ -103,6 +104,6 @@ class CardListItem extends StatelessWidget {
   }
 
   _addFavorite(int index) {
-    _bloc.dispatch(FavoriteButtonTapped(index: index));
+    _bloc.dispatch(FavoriteButtonTapped(index: index, tabIndex: _tabIndex));
   }
 }

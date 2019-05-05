@@ -156,7 +156,9 @@ class ApiProvider {
 
     return refUser
         .document(user.email)
-        .updateData({'favorites': FieldValue.arrayUnion(eventId)});
+        .updateData({'favorites': FieldValue.arrayUnion(eventId)}).catchError((error){
+          print(error.toString());
+    });
   }
 
   Future<void> removeFavorite(String eventId, UserFireStore user) {

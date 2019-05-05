@@ -133,10 +133,10 @@ class _HomePageState extends State<HomePage> {
                     builder: (BuildContext context, HomeState state) {
                       return TabBarView(
                         children: <Widget>[
-                          _getTab(state.loadingRecommended, state.recommended),
-                          _getTab(state.loadingUpcoming, state.upcoming),
-                          _getTab(state.loadingPopular, state.popular),
-                          _getTab(state.loadAll, state.all)
+                          _getTab(state.loadingRecommended, state.recommended,0),
+                          _getTab(state.loadingUpcoming, state.upcoming,1),
+                          _getTab(state.loadingPopular, state.popular,2),
+                          _getTab(state.loadAll, state.all,3)
                         ],
                       );
                     }))
@@ -263,7 +263,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Tab _getTab(bool isLoading, List<Event> events) {
+  Tab _getTab(bool isLoading, List<Event> events, int tabIndex) {
     return Tab(
       child: LoadingInfo(
           isLoading: isLoading,
@@ -272,7 +272,7 @@ class _HomePageState extends State<HomePage> {
               itemCount: events.length,
               itemBuilder: (BuildContext context, int index) {
                 return CardListItem(
-                    events[index], _onCardItemTapped, index, _bloc);
+                    events[index], _onCardItemTapped, tabIndex, index, _bloc);
               })),
     );
   }

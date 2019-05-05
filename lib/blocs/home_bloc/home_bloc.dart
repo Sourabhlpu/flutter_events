@@ -38,6 +38,10 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
       yield* _fetchUpcomingList();
     }
 
+    if (event is FavoriteButtonTapped) {
+      yield* _manageFavorite(event.index, event.tabIndex);
+    }
+
     if (event is ListLoadedEvent) {
       yield currentState.update(all: event.events, loadAll: false);
     }
@@ -57,9 +61,6 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
           popular: event.events, loadingPopular: false);
     }
 
-    if (event is FavoriteButtonTapped) {
-      yield* _manageFavorite(event.index);
-    }
 
     if (event is ListLoadingErrorEvent) {
       yield currentState.update(isError: true, error: event.error);
@@ -120,10 +121,10 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     }
   }
 
-  _manageFavorite(int index) async* {
-    _changeFavoriteStatusInEventsList(index);
+  Stream<HomeState> _manageFavorite(int index, int tabIndex) async* {
+    _changeFavoriteStatusInEventsList(index, tabIndex);
 
-    List<Event> events = _getEventList();
+    List<Event> events = _getEventList(tabIndex);
 
     if (await AppUtils.checkNetworkAvailability()) {
       if (events[index].isFavorite) {
@@ -131,37 +132,45 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
             .addFavorite(events[index], _userFs)
             .then((_) {})
             .catchError(() {
-          _changeFavoriteStatusInEventsList(index);
+          _changeFavoriteStatusInEventsList(index, tabIndex);
         });
       } else {
         repository
             .removeFavorite(events[index].id, _userFs)
             .then((_) {})
             .catchError(() {
-          _changeFavoriteStatusInEventsList(index);
+          _changeFavoriteStatusInEventsList(index, tabIndex);
         });
       }
     } else {
       _handleError("No Internet");
-      _changeFavoriteStatusInEventsList(index);
+      _changeFavoriteStatusInEventsList(index, tabIndex);
     }
   }
 
-  List<Event> _getEventList() {
-    /*List<Event> events = [];
-
-    if (currentState is ListLoaded) {
-      events = (currentState as ListLoaded).events;
+  List<Event> _getEventList(int tabIndex) {
+    switch(tabIndex)
+    {
+      case 0 :
+        return currentState.recommended;
+        break;
+      case 1:
+        return currentState.upcoming;
+        break;
+      case 2:
+        return currentState.popular;
+        break;
+      case 3:
+        return currentState.all;
+        break;
     }
-
-    return events;*/
   }
 
   // as objects from built value gen are immutable, we create a new object with the
   // toggled fav value at an index. Add that to the events list and then remove the old one.\
 
-  _changeFavoriteStatusInEventsList(int index) {
-    var events = _getEventList();
+  _changeFavoriteStatusInEventsList(int index, int tabIndex) {
+    var events = _getEventList(tabIndex);
 
     var eventNew = events[index]
         .rebuild((event) => event..isFavorite = !events[index].isFavorite);
@@ -169,7 +178,27 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     events.insert(index, eventNew);
     events.removeAt(index + 1);
 
-    dispatch(ListLoadedEvent(events: List.from(events)));
+    _dispatchUpdatedList(tabIndex, events);
+
+  }
+
+  _dispatchUpdatedList(int tabIndex, List<Event> events)
+  {
+    switch(tabIndex)
+    {
+      case 0 :
+        dispatch(RecommendedListLoadedEvent(events: List.from(events)));
+        break;
+      case 1:
+        dispatch(UpcomingListLoadedEvent(events: List.from(events)));
+        break;
+      case 2:
+        dispatch(PopularListLoadedEvent(events: List.from(events)));
+        break;
+      case 3:
+        dispatch(ListLoadedEvent(events: List.from(events)));
+        break;
+    }
   }
 
   void _handleError(String error) {

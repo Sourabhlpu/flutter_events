@@ -90,8 +90,9 @@ class ListLoadingErrorEvent extends HomeEvents
 class FavoriteButtonTapped extends HomeEvents{
 
   final int index;
+  final int tabIndex;
 
-  FavoriteButtonTapped({this.index}) : super([index]);
+  FavoriteButtonTapped({this.index, this.tabIndex}) : super([index, tabIndex]);
 
   @override
   String toString() => "fav button tapped";
