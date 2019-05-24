@@ -95,7 +95,9 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
           if (isSignup) {
             UserFireStore userFs = UserFireStore((b) => b
               ..email = user.email
-              ..name = user.name);
+              ..name = user.name
+              ..hasPayment = false
+            );
 
             _signupSuccesAction(userFs);
           } else {
@@ -121,7 +123,9 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
         repository.addUserToRemoteDb(user).then((value) {
           UserFireStore userFs = UserFireStore((b) => b
             ..email = user.email
-            ..name = user.name);
+            ..name = user.name
+            ..hasPayment = false
+          );
           _signupSuccesAction(userFs);
         });
       });
@@ -156,8 +160,8 @@ class AuthBloc extends Bloc<AuthenticationEvents, AuthenticationStates> {
   @override
   void dispose() {
     super.dispose();
-    signinSubscription.cancel();
-    signupSubscription.cancel();
-    googleSinginSubscription.cancel();
+    signinSubscription?.cancel();
+    signupSubscription?.cancel();
+    googleSinginSubscription?.cancel();
   }
 }

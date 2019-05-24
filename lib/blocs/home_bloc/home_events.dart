@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_events/models/events/event.dart';
+import 'package:meta/meta.dart';
 
 abstract class HomeEvents extends Equatable{
 
@@ -99,3 +100,44 @@ class FavoriteButtonTapped extends HomeEvents{
 
 
 }
+
+class DetailsPageOpened extends HomeEvents{
+
+  final int index;
+  final int tabIndex;
+
+  DetailsPageOpened({@required this.index, @ required this.tabIndex}) : super([index, tabIndex]);
+
+  @override
+  String toString()  => "details page opened";
+}
+
+class DetailsPageClosed extends HomeEvents{
+
+  @override
+  String toString()  => "details page closed";
+}
+
+
+class BookEventTapped extends HomeEvents{
+
+  @override
+  String toString()  => "book event tapped";
+}
+
+class ShowAddCardDialog extends HomeEvents{
+
+  String toString()  => "show add card dialog";
+}
+
+class CardAdded extends HomeEvents{
+
+  final String token;
+
+  CardAdded({@required this.token}) : super([token]);
+
+  String toString()  => "card added ";
+}
+
+
+

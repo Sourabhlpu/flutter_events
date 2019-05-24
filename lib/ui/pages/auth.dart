@@ -135,6 +135,7 @@ class _AuthenticationState extends State<Authentication>
 
   @override
   void dispose() {
+     super.dispose();
     _bloc.dispose();
   }
 

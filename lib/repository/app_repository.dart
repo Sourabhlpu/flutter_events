@@ -127,4 +127,10 @@ class AppRepository {
 
   Future<GoogleSignInAccount> signinWithGoogle() =>
       apiProvider.signInWithGoogle();
+
+  Future<Null> addCardToken(String token)  => apiProvider.addCardToken(token);
+
+  void chargeUser(String amount) => apiProvider.chargeUser(amount);
+
+  Future<bool> isCardSaved(UserFireStore user) => apiProvider.isCardSaved(user);
 }

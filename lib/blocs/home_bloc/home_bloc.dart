@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_events/blocs/home_bloc/home_events.dart';
@@ -9,7 +8,7 @@ import 'package:flutter_events/repository/app_repository.dart';
 import 'package:flutter_events/blocs/home_bloc/home_states.dart';
 import 'package:flutter_events/utils/app_utils.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart';
+
 
 class HomeBloc extends Bloc<HomeEvents, HomeState> {
   AppRepository repository;
@@ -52,24 +51,47 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     }
 
     if (event is UpcomingListLoadedEvent) {
-      yield currentState.update(
-          upcoming: event.events, loadingUpcoming: false);
+      yield currentState.update(upcoming: event.events, loadingUpcoming: false);
     }
 
     if (event is PopularListLoadedEvent) {
-      yield currentState.update(
-          popular: event.events, loadingPopular: false);
+      yield currentState.update(popular: event.events, loadingPopular: false);
     }
-
 
     if (event is ListLoadingErrorEvent) {
       yield currentState.update(isError: true, error: event.error);
     }
+
+    if (event is DetailsPageOpened) {
+      yield currentState.update(
+          selectedEvent: _getEventList(event.tabIndex)[event.index]);
+    }
+
+    if (event is DetailsPageClosed) {
+      yield currentState.update(selectedEvent: null);
+    }
+
+    if (event is BookEventTapped) {
+      yield* _manageBooking();
+    }
+
+    if (event is ShowAddCardDialog) {
+
+      yield ShowAddCardDialogState(showDialog: true);
+      //doing this show that this is reset to false and we can again open the dialog next time.
+      // as in the bloc currentState and nextState are compared before yielding states.
+      yield ShowAddCardDialogState(showDialog: false);
+
+    }
+
+    if(event is CardAdded)
+      {
+
+      }
   }
 
   Stream<HomeState> _fetchAllEvents() async* {
-    yield currentState.update(
-        loadAll: true);
+    yield currentState.update(loadAll: true);
     if (await AppUtils.checkNetworkAvailability()) {
       streamSubscriptionAll?.cancel();
 
@@ -78,7 +100,7 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
           .asStream()
           .handleError(_handleError)
           .listen((events) {
-      dispatch(ListLoadedEvent(events: events));
+        dispatch(ListLoadedEvent(events: events));
       });
     } else {
       yield currentState.update(isError: true, error: 'No Internet');
@@ -104,7 +126,7 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
   }
 
   Stream<HomeState> _fetchUpcomingList() async* {
-    yield currentState.update(loadingUpcoming:true);
+    yield currentState.update(loadingUpcoming: true);
 
     if (await AppUtils.checkNetworkAvailability()) {
       streamSubscriptionUpcoming?.cancel();
@@ -148,10 +170,23 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     }
   }
 
+  Stream<HomeState> _manageBooking() async* {
+
+    repository.isCardSaved(_userFs).then((isCardSaved) {
+      if (isCardSaved) {
+        //show a dialog to confirm payment with the card number;
+
+      } else {
+        // show a dialog to enter card details;
+        dispatch(ShowAddCardDialog());
+
+      }
+    });
+  }
+
   List<Event> _getEventList(int tabIndex) {
-    switch(tabIndex)
-    {
-      case 0 :
+    switch (tabIndex) {
+      case 0:
         return currentState.recommended;
         break;
       case 1:
@@ -179,14 +214,11 @@ class HomeBloc extends Bloc<HomeEvents, HomeState> {
     events.removeAt(index + 1);
 
     _dispatchUpdatedList(tabIndex, events);
-
   }
 
-  _dispatchUpdatedList(int tabIndex, List<Event> events)
-  {
-    switch(tabIndex)
-    {
-      case 0 :
+  _dispatchUpdatedList(int tabIndex, List<Event> events) {
+    switch (tabIndex) {
+      case 0:
         dispatch(RecommendedListLoadedEvent(events: List.from(events)));
         break;
       case 1:

@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'dart:convert';
 
 class ApiProvider {
   final FirebaseAuth firebaseAuth;
@@ -109,7 +110,6 @@ class ApiProvider {
   }
 
   getUpcomingEventList(UserFireStore userFs) {
-
     List<Event> events = List<Event>();
 
     return refEvents.orderBy("startDate").getDocuments().then((querySnapshot) {
@@ -127,9 +127,6 @@ class ApiProvider {
       return events;
     });
   }
-
-
-
 
   Future<void> saveInterests(List<String> interests, String email) {
     Map<String, dynamic> data = {'interests': interests};
@@ -154,10 +151,9 @@ class ApiProvider {
   Future<void> addFavorite(Event event, UserFireStore user) {
     List<String> eventId = [event.id];
 
-    return refUser
-        .document(user.email)
-        .updateData({'favorites': FieldValue.arrayUnion(eventId)}).catchError((error){
-          print(error.toString());
+    return refUser.document(user.email).updateData(
+        {'favorites': FieldValue.arrayUnion(eventId)}).catchError((error) {
+      print(error.toString());
     });
   }
 
@@ -200,5 +196,38 @@ class ApiProvider {
     return refEvents
         .document()
         .setData(standardSerializers.serializeWith(Event.serializer, event));
+  }
+
+  Future<Null> addCardToken(String token) {
+   return  firebaseAuth.currentUser().then((user) {
+      return firestore
+          .collection('user')
+          .document(user.email)
+          .collection('paymentTokens')
+          .add({'tokenId': token}).then((val) {
+        print('saved');
+      });
+    });
+  }
+
+  void chargeUser(String amount) {
+    firebaseAuth.currentUser().then((user) {
+      firestore
+          .collection('user')
+          .document(user.email)
+          .collection('charges')
+          .add({'amount': amount});
+    });
+  }
+
+  Future<bool> isCardSaved(UserFireStore user) {
+
+
+    return refUser.document(user.email).get().then((snapshot) {
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data;
+        return data['hasPayment'];
+      }
+    });
   }
 }

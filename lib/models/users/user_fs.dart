@@ -45,6 +45,8 @@ abstract class UserFireStore implements Built<UserFireStore, UserFireStoreBuilde
    BuiltList<String> get interests;
    @nullable
    BuiltList<String> get favorites;
+   @nullable
+   bool get hasPayment;
 
   UserFireStore._();
   factory UserFireStore([updates(UserFireStoreBuilder b)]) = _$UserFireStore;

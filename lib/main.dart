@@ -80,7 +80,7 @@ class MyApp extends StatelessWidget {
             if (settings.arguments is Event) {
               Event event = settings.arguments as Event;
               return MaterialPageRoute(
-                  builder: (BuildContext context) => EventDetail(event));
+                  builder: (BuildContext context) => EventDetail(event: event, repository: repository,));
             }
           }
 

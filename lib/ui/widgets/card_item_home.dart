@@ -5,6 +5,7 @@ import 'package:flutter_events/blocs/home_bloc/home_events.dart';
 import 'package:flutter_events/models/events/event.dart';
 import 'package:flutter_events/ui/widgets/add_splash.dart';
 import 'package:flutter_events/ui/widgets/icon_white_background.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 class CardListItem extends StatelessWidget {
   Event _event;
@@ -45,12 +46,21 @@ class CardListItem extends StatelessWidget {
                   height: 170,
                 ),
                 Positioned(
+                  width: 40,
+                  height: 40,
                   bottom: 4,
                   right: 8,
                   child: AddSplash(
-                    child: _event.isFavorite
-                        ? IconWhiteBackground(Icons.favorite)
-                        : IconWhiteBackground(Icons.favorite_border),
+                    child: Center(
+                      child: _event.isFavorite
+                          ? FlareActor(
+                        "flare_animations/favorite.flr",
+                        animation: "go",
+                      )
+                          : FlareActor(
+                        "flare_animations/favorite.flr",
+                      ),
+                    ),
                     onTap: () {
                       _addFavorite(_index, );
                     },

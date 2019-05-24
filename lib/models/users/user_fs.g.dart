@@ -51,6 +51,12 @@ class _$UserFireStoreSerializer implements StructuredSerializer<UserFireStore> {
             specifiedType:
                 const FullType(BuiltList, const [const FullType(String)])));
     }
+    if (object.hasPayment != null) {
+      result
+        ..add('hasPayment')
+        ..add(serializers.serialize(object.hasPayment,
+            specifiedType: const FullType(bool)));
+    }
 
     return result;
   }
@@ -90,6 +96,10 @@ class _$UserFireStoreSerializer implements StructuredSerializer<UserFireStore> {
                       const FullType(BuiltList, const [const FullType(String)]))
               as BuiltList);
           break;
+        case 'hasPayment':
+          result.hasPayment = serializers.deserialize(value,
+              specifiedType: const FullType(bool)) as bool;
+          break;
       }
     }
 
@@ -108,12 +118,19 @@ class _$UserFireStore extends UserFireStore {
   final BuiltList<String> interests;
   @override
   final BuiltList<String> favorites;
+  @override
+  final bool hasPayment;
 
   factory _$UserFireStore([void updates(UserFireStoreBuilder b)]) =>
       (new UserFireStoreBuilder()..update(updates)).build();
 
   _$UserFireStore._(
-      {this.name, this.email, this.phone, this.interests, this.favorites})
+      {this.name,
+      this.email,
+      this.phone,
+      this.interests,
+      this.favorites,
+      this.hasPayment})
       : super._();
 
   @override
@@ -131,15 +148,18 @@ class _$UserFireStore extends UserFireStore {
         email == other.email &&
         phone == other.phone &&
         interests == other.interests &&
-        favorites == other.favorites;
+        favorites == other.favorites &&
+        hasPayment == other.hasPayment;
   }
 
   @override
   int get hashCode {
     return $jf($jc(
-        $jc($jc($jc($jc(0, name.hashCode), email.hashCode), phone.hashCode),
-            interests.hashCode),
-        favorites.hashCode));
+        $jc(
+            $jc($jc($jc($jc(0, name.hashCode), email.hashCode), phone.hashCode),
+                interests.hashCode),
+            favorites.hashCode),
+        hasPayment.hashCode));
   }
 
   @override
@@ -149,7 +169,8 @@ class _$UserFireStore extends UserFireStore {
           ..add('email', email)
           ..add('phone', phone)
           ..add('interests', interests)
-          ..add('favorites', favorites))
+          ..add('favorites', favorites)
+          ..add('hasPayment', hasPayment))
         .toString();
   }
 }
@@ -180,6 +201,10 @@ class UserFireStoreBuilder
       _$this._favorites ??= new ListBuilder<String>();
   set favorites(ListBuilder<String> favorites) => _$this._favorites = favorites;
 
+  bool _hasPayment;
+  bool get hasPayment => _$this._hasPayment;
+  set hasPayment(bool hasPayment) => _$this._hasPayment = hasPayment;
+
   UserFireStoreBuilder();
 
   UserFireStoreBuilder get _$this {
@@ -189,6 +214,7 @@ class UserFireStoreBuilder
       _phone = _$v.phone;
       _interests = _$v.interests?.toBuilder();
       _favorites = _$v.favorites?.toBuilder();
+      _hasPayment = _$v.hasPayment;
       _$v = null;
     }
     return this;
@@ -217,7 +243,8 @@ class UserFireStoreBuilder
               email: email,
               phone: phone,
               interests: _interests?.build(),
-              favorites: _favorites?.build());
+              favorites: _favorites?.build(),
+              hasPayment: hasPayment);
     } catch (_) {
       String _$failedField;
       try {
